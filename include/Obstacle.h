@@ -13,12 +13,11 @@ class Obstacle {
 private:
     pair<int, int> origin; // at the top left of the obstacle
     pair<int, int> size; // how far down/right the object extends from the origin
-    vector<pair<int, int>> coords; // all coordinates the obstacle occupies
 public:
     Obstacle();
     pair<int, int> getOrigin() const;
     pair<int, int> getSize() const;
-    vector<pair<int, int>> getCoords();
+    vector<pair<int, int>> getCoords() const;
     int getLeftBoundary() const;
     int getRightBoundary() const;
     int getUpperBoundary() const;
