@@ -4,9 +4,16 @@
 
 #ifndef ROBOT_FLEET_SYSTEM_H
 #define ROBOT_FLEET_SYSTEM_H
+#include <iostream>
+#include "ObstacleManager.h"
 
 
 class System {
+private:
+    ObstacleManager obstacles;
+public:
+    System();
+    ~System();
 };
 
 

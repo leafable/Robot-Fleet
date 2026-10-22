@@ -4,9 +4,25 @@
 
 #ifndef ROBOT_FLEET_OBSTACLE_H
 #define ROBOT_FLEET_OBSTACLE_H
+#include <vector>
+#include <random>
 
+using namespace std;
 
 class Obstacle {
+private:
+    pair<int, int> origin; // at the top left of the obstacle
+    pair<int, int> size; // how far down/right the object extends from the origin
+    vector<pair<int, int>> coords; // all coordinates the obstacle occupies
+public:
+    Obstacle();
+    pair<int, int> getOrigin() const;
+    pair<int, int> getSize() const;
+    vector<pair<int, int>> getCoords();
+    int getLeftBoundary() const;
+    int getRightBoundary() const;
+    int getUpperBoundary() const;
+    int getLowerBoundary() const;
 };
 
 

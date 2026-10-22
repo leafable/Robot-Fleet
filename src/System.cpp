@@ -3,3 +3,10 @@
 //
 
 #include "System.h"
+
+System::System() : obstacles(7) {
+
+}
+System::~System() {
+
+}
