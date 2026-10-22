@@ -1,5 +1,8 @@
 #ifndef ROBOT_FLEET_TASK_H
 #define ROBOT_FLEET_TASK_H
+#include <iostream>
+#include <vector>
+using namespace std;
 
 
 class Task {
