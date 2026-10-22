@@ -15,7 +15,8 @@ private:
 public:
     ObstacleManager(int num);
     bool hasOverlap(const Obstacle &obstacle2) const;
-    vector<Obstacle> getObstacles();
+    const vector<Obstacle> *getObstacles() const;
+    void printAllCoords() const; // for debugging purposes, do not use
 };
 
 

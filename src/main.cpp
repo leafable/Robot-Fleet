@@ -7,5 +7,7 @@
 int main() {
     System system;
 
+    system.printWarehouse();
+
     return 0;
 }
