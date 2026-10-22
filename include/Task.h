@@ -15,11 +15,11 @@ class Task {
 
     Task(int pickupX, int pickupY, int dropOffX, int dropOffY);
 
-    vector2 getPickupPosition();
+    vector2 getPickupPosition() const;
 
-    vector2 getDropOffPosition();
+    vector2 getDropOffPosition() const;
 
-    bool isRobotAssigned();
+    bool isRobotAssigned() const;
 
     void setRobotAssigned(bool robotAssigned);
 };
