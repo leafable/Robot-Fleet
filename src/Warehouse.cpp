@@ -3,30 +3,47 @@
 //
 
 #include "../include/Warehouse.h"
+#include "ObstacleManager.h"
 
 Warehouse::Warehouse(int size) {
     this->size = size;
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
-            warehouse[{i, j}] = '.';
+            warehouse.resize(size);
+            warehouse.at(i).push_back('.');
         }
     }
 }
-void Warehouse::updateWarehouse(const ObstacleManager& obstacles) {
-    for (const auto& obstacle : *obstacles.getObstacles()) {
+void Warehouse::updateWarehouse(const vector<Obstacle>& obstacles) {
+
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            warehouse[i][j] = '.';
+        }
+    }
+
+    for (const auto& obstacle : obstacles) {
         for (const auto& coord : obstacle.getCoords()) {
-            warehouse[coord] = '#';
+            warehouse[coord.first][coord.second] = '#';
         }
     }
 }
-string Warehouse::getWarehouseStr(const ObstacleManager& obstacles) {
+string Warehouse::getWarehouseStr(const vector<Obstacle>& obstacles) {
     stringstream ss;
     updateWarehouse(obstacles);
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
-            ss << " " << warehouse[{i, j}] << " ";
+            ss << " " << warehouse[i][j] << " ";
         }
         ss << endl;
     }
     return ss.str();
+}
+
+int Warehouse::getWarehouseSize() const {
+    return size;
+}
+
+const vector<vector<char>> *Warehouse::getWarehouse() const {
+    return &warehouse;
 }

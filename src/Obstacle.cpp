@@ -3,16 +3,17 @@
 //
 
 #include "../include/Obstacle.h"
+#include "../include/Warehouse.h"
 
-Obstacle::Obstacle() {
+Obstacle::Obstacle(int warehouseSize) {
     random_device rd; //https://en.cppreference.com/cpp/numeric/random/uniform_int_distribution
     mt19937 gen(rd());
     uniform_int_distribution<int> sizeX(2, 4);
     uniform_int_distribution<int> sizeY(2, 4);
     size.first = sizeX(gen);
     size.second = sizeY(gen);
-    uniform_int_distribution<int> originX(0, 20 - size.first);
-    uniform_int_distribution<int> originY(0, 20 - size.second);
+    uniform_int_distribution<int> originX(0, warehouseSize - size.first);
+    uniform_int_distribution<int> originY(0, warehouseSize - size.second);
     origin.first = originX(gen);
     origin.second = originY(gen);
 }
@@ -37,9 +38,9 @@ int Obstacle::getLeftBoundary() const {
 int Obstacle::getRightBoundary() const {
     return origin.first + size.first;
 }
-int Obstacle::getUpperBoundary() const {
+int Obstacle::getLowerBoundary() const {
     return origin.second;
 }
-int Obstacle::getLowerBoundary() const {
+int Obstacle::getUpperBoundary() const {
     return origin.second + size.second;
 }
