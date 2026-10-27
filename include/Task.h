@@ -7,17 +7,17 @@ using namespace std;
 
 class Task {
     private:
-    vector2 pickup;
-    vector2 dropOff;
+    pair<int, int> pickup;
+    pair<int, int> dropOff;
     bool robotAssigned;
 
     public:
 
     Task(int pickupX, int pickupY, int dropOffX, int dropOffY);
 
-    vector2 getPickupPosition() const;
+    pair<int, int> getPickupPosition() const;
 
-    vector2 getDropOffPosition() const;
+    pair<int, int> getDropOffPosition() const;
 
     bool isRobotAssigned() const;
 

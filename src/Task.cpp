@@ -7,11 +7,11 @@
         robotAssigned = false;
     }
 
-    vector2 Task::getPickupPosition() const{
+    pair<int, int> Task::getPickupPosition() const{
         return pickup;
     }
 
-    vector2 Task::getDropOffPosition() const{
+    pair<int, int> Task::getDropOffPosition() const{
         return dropOff;
     }
 
