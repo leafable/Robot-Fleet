@@ -8,18 +8,22 @@
 #include <string>
 #include <map>
 #include <sstream>
-#include "ObstacleManager.h"
+#include <vector>
+
+class Obstacle;
 
 using namespace std;
 
 class Warehouse {
 private:
-    map<pair<int, int>, char> warehouse; // https://www.geeksforgeeks.org/cpp/different-ways-to-initialize-a-map-in-cpp/
+    vector<vector<char>> warehouse; // https://www.geeksforgeeks.org/cpp/different-ways-to-initialize-a-map-in-cpp/
     int size;
 public:
     Warehouse(int size);
-    void updateWarehouse(const ObstacleManager& obstacles);
-    string getWarehouseStr(const ObstacleManager& obstacles);
+    void updateWarehouse(const vector<Obstacle>& obstacles);
+    string getWarehouseStr(const vector<Obstacle>& obstacles);
+    int getWarehouseSize() const;
+    const vector<vector<char>> *getWarehouse() const;
 };
 
 

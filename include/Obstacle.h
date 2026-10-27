@@ -9,12 +9,14 @@
 
 using namespace std;
 
+class Warehouse;
+
 class Obstacle {
 private:
     pair<int, int> origin; // at the top left of the obstacle
     pair<int, int> size; // how far down/right the object extends from the origin
 public:
-    Obstacle();
+    Obstacle(int warehouseSize);
     pair<int, int> getOrigin() const;
     pair<int, int> getSize() const;
     vector<pair<int, int>> getCoords() const;

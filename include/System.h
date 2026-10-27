@@ -6,18 +6,16 @@
 #define ROBOT_FLEET_SYSTEM_H
 #include <iostream>
 #include "ObstacleManager.h"
-#include "Warehouse.h"
+#include "TempWarehouse.h"
 
 
 class System {
 private:
-    ObstacleManager obstacles;
-    Warehouse warehouse;
+    TempWarehouse tempWarehouse;
 public:
     System();
     ~System();
     void printWarehouse();
-    void printAllCoords(); // for debugging purposes, do not use
 };
 
 

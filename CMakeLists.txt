@@ -13,8 +13,8 @@ add_executable(Robot_Fleet
         include/System.h
         src/Obstacle.cpp
         include/Obstacle.h
-        src/Task.cpp
-        include/Task.h
+#        src/Task.cpp
+#        include/Task.h
         src/TaskManager.cpp
         include/TaskManager.h
         src/ObstacleManager.cpp
@@ -22,4 +22,6 @@ add_executable(Robot_Fleet
         src/Robot.cpp
         include/Robot.h
         src/RobotManager.cpp
-        include/RobotManager.h)
+        include/RobotManager.h
+        src/TempWarehouse.cpp
+        include/TempWarehouse.h)
