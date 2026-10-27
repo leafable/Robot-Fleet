@@ -7,6 +7,14 @@
 
 
 class RobotManager {
+    public:
+    RobotManager();
+    ~RobotManager();
+    void moveRobot(Robot* r);
+    pair<int, int> nextMove(Robot* r)
+
+    private:
+    vector<Robot> robots;
 };
 
 
