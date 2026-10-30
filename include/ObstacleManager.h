@@ -13,15 +13,17 @@ class Warehouse;
 class ObstacleManager {
 private:
     vector<Obstacle> obstacles;
-    static int numSpacesTaken;
+    static int warehouseSeed;
+    int numSpacesTaken;
 public:
-    ObstacleManager(int num, Warehouse& warehouse);
-    bool hasOverlap(const Obstacle &obstacle2) const;
-    const vector<Obstacle> *getObstacles() const;
-    void printAllCoords() const; // for debugging purposes, do not use
-    pair<int, int> findDfsStart(const Warehouse& warehouse);
-    int dfs(pair<int, int> currentCoord, map<pair<int, int>, bool>& visited, const Warehouse& warehouse); // https://www.geeksforgeeks.org/dsa/depth-first-search-or-dfs-for-a-graph/
-    static int getNumSpacesTaken();
+    ObstacleManager(int targetNumObstacles, Warehouse& warehouse);
+    ObstacleManager(int targetNumObstacles, Warehouse& warehouse, int setSeed);
+    bool hasOverlap(const Obstacle& obstacle2) const;
+    bool hasOverlap(const pair<int,int>& coord) const;
+    const vector<Obstacle>* getObstacles() const;
+    int getNumSpacesTaken() const;
+    static int getSeed();
+    int getNumObstacles() const;
 };
 
 
