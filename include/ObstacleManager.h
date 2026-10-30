@@ -13,7 +13,7 @@ class Warehouse;
 class ObstacleManager {
 private:
     vector<Obstacle> obstacles;
-    static int warehouseSeed;
+    int warehouseSeed = static_cast<int>(random_device{}());
     int numSpacesTaken;
 public:
     ObstacleManager(int targetNumObstacles, Warehouse& warehouse);
@@ -22,7 +22,7 @@ public:
     bool hasOverlap(const pair<int,int>& coord) const;
     const vector<Obstacle>* getObstacles() const;
     int getNumSpacesTaken() const;
-    static int getSeed();
+    int getSeed() const;
     int getNumObstacles() const;
 };
 

@@ -7,13 +7,14 @@
 #include "Warehouse.h"
 
 // By default, randomly generate a seed
-int ObstacleManager::warehouseSeed = random_device{}();
+// int ObstacleManager::warehouseSeed = random_device{}();
 
 // If no seed is provided, pass the randomly generated seed
 ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse) : ObstacleManager(targetNumObstacles, warehouse, warehouseSeed) {}
 
 ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse, const int setSeed) : numSpacesTaken(0) {
 
+    this->warehouseSeed = setSeed;
     mt19937 seed(setSeed);
 
     // if the passed value is less than 1, no obstacles are created
@@ -94,7 +95,7 @@ int ObstacleManager::getNumSpacesTaken() const {
     return numSpacesTaken;
 }
 
-int ObstacleManager::getSeed() {
+int ObstacleManager::getSeed() const {
     return warehouseSeed;
 }
 
