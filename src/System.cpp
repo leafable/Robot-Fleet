@@ -4,7 +4,7 @@
 
 #include "System.h"
 
-System::System() : warehouse(20), tempWarehouse(5), obstacles(warehouse.getWarehouseSize(), warehouse) {
+System::System() : warehouse(20), tempWarehouse(5), obstacles(warehouse.getWarehouseSize(), warehouse, 5) {
 
 }
 System::~System() {
