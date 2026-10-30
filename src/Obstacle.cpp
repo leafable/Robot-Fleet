@@ -2,20 +2,19 @@
 // Created by leafy on 10/20/2026.
 //
 
-#include "../include/Obstacle.h"
-#include "../include/Warehouse.h"
+#include "Obstacle.h"
+#include "Warehouse.h"
 
-Obstacle::Obstacle(int warehouseSize) {
-    random_device rd; //https://en.cppreference.com/cpp/numeric/random/uniform_int_distribution
-    mt19937 gen(rd());
+Obstacle::Obstacle(int warehouseSize, mt19937& seed) {
+    //https://en.cppreference.com/cpp/numeric/random/uniform_int_distribution
     uniform_int_distribution<int> sizeX(2, 4);
     uniform_int_distribution<int> sizeY(2, 4);
-    size.first = sizeX(gen);
-    size.second = sizeY(gen);
+    size.first = sizeX(seed);
+    size.second = sizeY(seed);
     uniform_int_distribution<int> originX(0, warehouseSize - size.first);
     uniform_int_distribution<int> originY(0, warehouseSize - size.second);
-    origin.first = originX(gen);
-    origin.second = originY(gen);
+    origin.first = originX(seed);
+    origin.second = originY(seed);
 }
 pair<int, int> Obstacle::getOrigin() const {
     return origin;
@@ -36,11 +35,11 @@ int Obstacle::getLeftBoundary() const {
     return origin.first;
 }
 int Obstacle::getRightBoundary() const {
-    return origin.first + size.first;
+    return origin.first + size.first - 1;
 }
 int Obstacle::getLowerBoundary() const {
     return origin.second;
 }
 int Obstacle::getUpperBoundary() const {
-    return origin.second + size.second;
+    return origin.second + size.second - 1;
 }

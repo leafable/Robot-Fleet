@@ -6,9 +6,10 @@
 #define ROBOT_FLEET_WAREHOUSE_H
 
 #include <string>
-#include <map>
 #include <sstream>
 #include <vector>
+#include <iomanip>
+#include "ObstacleManager.h"
 
 class Obstacle;
 
@@ -24,6 +25,8 @@ public:
     string getWarehouseStr(const vector<Obstacle>& obstacles);
     int getWarehouseSize() const;
     const vector<vector<char>> *getWarehouse() const;
+    pair<int, int> findDfsStart();
+    int dfs(pair<int, int> currentCoord, map<pair<int, int>, bool>& visited);
 };
 
 

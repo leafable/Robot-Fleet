@@ -16,7 +16,7 @@ private:
     pair<int, int> origin; // at the top left of the obstacle
     pair<int, int> size; // how far down/right the object extends from the origin
 public:
-    Obstacle(int warehouseSize);
+    Obstacle(int warehouseSize, mt19937& seed);
     pair<int, int> getOrigin() const;
     pair<int, int> getSize() const;
     vector<pair<int, int>> getCoords() const;
