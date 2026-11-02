@@ -4,6 +4,7 @@
 
 #ifndef ROBOT_FLEET_PATHFINDER_H
 #define ROBOT_FLEET_PATHFINDER_H
+#include <vector>
 
 class Task;
 class Robot;
@@ -34,7 +35,7 @@ class PathFinder {
     PathFinder();
     ~PathFinder();
     static int calcH (Point a, Point b);
-    void searchPath(Warehouse& w, Robot& r, Task& t);
+    std::vector<Point> searchPath(Warehouse& w, Robot& r, Task& t);
 
     private:
         // Creates a private struct to hold data of visited nodes
