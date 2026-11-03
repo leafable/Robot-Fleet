@@ -13,7 +13,7 @@ class Warehouse;
 class ObstacleManager {
 private:
     vector<Obstacle> obstacles;
-    int warehouseSeed = static_cast<int>(random_device{}());
+    static int warehouseSeed;
     int numSpacesTaken;
 public:
     ObstacleManager(int targetNumObstacles, Warehouse& warehouse);

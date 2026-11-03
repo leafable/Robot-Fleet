@@ -17,6 +17,7 @@ private:
 
     int getSelection(int min, int max, bool bounded);
     int getSelection(int min, int max, bool bounded, const string& text, const string& error);
+
 public:
     System();
     ~System();

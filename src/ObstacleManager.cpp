@@ -6,18 +6,17 @@
 
 #include "Warehouse.h"
 
-// By default, randomly generate a seed
-// int ObstacleManager::warehouseSeed = random_device{}();
+int ObstacleManager::warehouseSeed = random_device{}();
 
 // If no seed is provided, pass the randomly generated seed
 ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse) : ObstacleManager(targetNumObstacles, warehouse, warehouseSeed) {}
 
-ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse, const int setSeed) : numSpacesTaken(0) {
+ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse, int setSeed) : numSpacesTaken(0) {
 
-    this->warehouseSeed = setSeed;
+    warehouseSeed = setSeed;
     mt19937 seed(setSeed);
 
-    // if the passed value is less than 1, no obstacles are created
+    // If the passed value is less than 1, no obstacles are created
     if (targetNumObstacles < 1) {
         return;
     }
@@ -25,20 +24,24 @@ ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& wareho
     const int maxAttempts = 100;
     int attempts{};
 
-    // create an obstacle so the loop has something to compare to
-    // obstacles.push_back(Obstacle());
-
+    // Repeat while the size of the vector is less than the target number of obstacles,
+    // or until the attempts exceed the max number of attempts
     while (obstacles.size() < targetNumObstacles && attempts < maxAttempts) {
+        // Create a candidate obstacle
         Obstacle candidate(warehouse.getWarehouseSize(), seed);
 
+        // If there's overlap, discard the candidate
         if (hasOverlap(candidate)) {
             attempts++;
             continue;
         }
 
-        obstacles.push_back(candidate);
-        warehouse.updateWarehouse(obstacles);
+        // Temporarily update the warehouse
+        warehouse.updateWarehouse(candidate, true);
 
+        // If the total number of air spaces is greater than the number of air spaces found
+        // by the dfs algorithm, then the candidate obstacle is separating the warehouse
+        // into islands that the robot cannot cross. Discard the candidate obstacle.
         const auto start = warehouse.findDfsStart();
         numSpacesTaken += candidate.getSize().first * candidate.getSize().second;
         const int numAirSpaces = warehouse.getWarehouseSize() * warehouse.getWarehouseSize() - numSpacesTaken;
@@ -47,12 +50,11 @@ ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& wareho
         if (start.first == -1 && start.second == -1 || warehouse.dfs(start, visited) < numAirSpaces) {
             attempts++;
             numSpacesTaken -= candidate.getSize().first * candidate.getSize().second;
-            obstacles.pop_back();
-            warehouse.updateWarehouse(obstacles);
+            warehouse.updateWarehouse(candidate, false);
             continue;
         }
 
-        warehouse.updateWarehouse(obstacles);
+        obstacles.push_back(candidate);
         attempts = 0;
     }
 
@@ -75,11 +77,11 @@ bool ObstacleManager::hasOverlap(const Obstacle& obstacle2) const {
 }
 
 bool ObstacleManager::hasOverlap(const pair<int,int>& coord) const {
-    for (const auto& obstacle1 : obstacles) {
+    for (const auto& obstacle : obstacles) {
         // Check if the point overlaps the obstacle on the x axis
-        if (obstacle1.getRightBoundary() >= coord.first && obstacle1.getLeftBoundary() <= coord.first) {
+        if (obstacle.getRightBoundary() >= coord.first && obstacle.getLeftBoundary() <= coord.first) {
             // Check if the point overlaps the obstacle on the y axis
-            if (obstacle1.getUpperBoundary() >= coord.second && obstacle1.getLowerBoundary() <= coord.second) {
+            if (obstacle.getUpperBoundary() >= coord.second && obstacle.getLowerBoundary() <= coord.second) {
                 return 1;
             }
         }
@@ -102,60 +104,3 @@ int ObstacleManager::getSeed() const {
 int ObstacleManager::getNumObstacles() const {
     return obstacles.size();
 }
-
-// pair<int, int> ObstacleManager::findDfsStart(const Warehouse& warehouse) {
-//     // Run through the warehouse vector and find the first air space
-//     for (int i = 0; i < warehouse.getWarehouseSize(); i++) {
-//         for (int j = 0; j < warehouse.getWarehouseSize(); j++) {
-//             if (warehouse.getWarehouse()->at(i).at(j) == '.') {
-//                 return {i, j};
-//             }
-//         }
-//     }
-//     return {-1, -1};
-// }
-
-// int ObstacleManager::dfs(pair<int, int> currentCoord, map<pair<int, int>, bool>& visited, const Warehouse& warehouse) {
-//
-//     int numSpacesFound = 1;
-//
-//     // set the current coordinate to visited
-//     visited[currentCoord] = true;
-//
-//     vector<pair<int, int>> adjacent;
-//
-//     // find all the spaces adjacent to the current coordinate
-//     pair<int, int> up = {currentCoord.first, currentCoord.second + 1};
-//     pair<int, int> down = {currentCoord.first, currentCoord.second - 1};
-//     pair<int, int> left = {currentCoord.first - 1, currentCoord.second};
-//     pair<int, int> right = {currentCoord.first + 1, currentCoord.second};
-//
-//     // if the neighboring spaces are valid and are filled with air, push it to the adjacent vector
-//     if (up.first >= 0 && up.second >= 0 && up.first < warehouse.getWarehouseSize() && up.second < warehouse.getWarehouseSize()) {
-//         if (warehouse.getWarehouse()->at(up.first).at(up.second) == '.') {
-//             adjacent.push_back(up);
-//         }
-//     }
-//     if (down.first >= 0 && down.second >= 0 && down.first < warehouse.getWarehouseSize() && down.second < warehouse.getWarehouseSize()) {
-//         if (warehouse.getWarehouse()->at(down.first).at(down.second) == '.') {
-//             adjacent.push_back(down);
-//         }
-//     }
-//     if (left.first >= 0 && left.second >= 0 && left.first < warehouse.getWarehouseSize() && left.second < warehouse.getWarehouseSize()) {
-//         if (warehouse.getWarehouse()->at(left.first).at(left.second) == '.') {
-//             adjacent.push_back(left);
-//         }
-//     }
-//     if (right.first >= 0 && right.second >= 0 && right.first < warehouse.getWarehouseSize() && right.second < warehouse.getWarehouseSize()) {
-//         if (warehouse.getWarehouse()->at(right.first).at(right.second) == '.') {
-//             adjacent.push_back(right);
-//         }
-//     }
-//
-//     for (auto& i : adjacent) {
-//         if (!visited[i]) {
-//             numSpacesFound += dfs(i, visited, warehouse);
-//         }
-//     }
-//     return numSpacesFound;
-// }

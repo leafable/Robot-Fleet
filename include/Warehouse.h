@@ -10,6 +10,7 @@
 #include <vector>
 #include <iomanip>
 #include "ObstacleManager.h"
+#include "RobotManager.h"
 
 class Obstacle;
 
@@ -19,10 +20,12 @@ class Warehouse {
 private:
     vector<vector<char>> warehouse; // https://www.geeksforgeeks.org/cpp/different-ways-to-initialize-a-map-in-cpp/
     int size;
+    int time;
 public:
     Warehouse(int size);
-    void updateWarehouse(const vector<Obstacle>& obstacles);
-    string getWarehouseStr(const vector<Obstacle>& obstacles);
+    void updateWarehouse(const Obstacle& obstacle, bool additive);
+    void updateWarehouse(const vector<Robot>& robots, int steps);
+    string getWarehouseStr();
     int getWarehouseSize() const;
     const vector<vector<char>> *getWarehouse() const;
     pair<int, int> findDfsStart();

@@ -7,8 +7,8 @@
 
 Obstacle::Obstacle(int warehouseSize, mt19937& seed) {
     //https://en.cppreference.com/cpp/numeric/random/uniform_int_distribution
-    uniform_int_distribution<int> sizeX(2, 4);
-    uniform_int_distribution<int> sizeY(2, 4);
+    uniform_int_distribution<int> sizeX(1, 5);
+    uniform_int_distribution<int> sizeY(1, 5);
     size.first = sizeX(seed);
     size.second = sizeY(seed);
     uniform_int_distribution<int> originX(0, warehouseSize - size.first);
