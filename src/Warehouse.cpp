@@ -13,27 +13,26 @@ Warehouse::Warehouse(int size) {
         }
     }
 }
-void Warehouse::updateWarehouse(const vector<Obstacle>& obstacles) {
 
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            warehouse[i][j] = '.';
-        }
-    }
+void Warehouse::updateWarehouse(const Obstacle& obstacle, bool additive) {
+    // Additive if mode == 1, subtractive if mode == 0
+    char ch = additive ? '#' : '.';
 
-    for (const auto& obstacle : obstacles) {
-        for (const auto& coord : obstacle.getCoords()) {
-            // Check that the coord isn't outside the bounds of the warehouse
-            if (coord.first < size && coord.second < size) {
-                // Occupy the coord with an obstacle
-                warehouse[coord.first][coord.second] = '#';
-            }
+    for (const auto& coord : obstacle.getCoords()) {
+        // Check that the coord isn't outside the bounds of the warehouse
+        if (coord.first < size && coord.second < size) {
+            // Occupy the coord with an obstacle/air depending on the mode
+            warehouse[coord.first][coord.second] = ch;
         }
     }
 }
-string Warehouse::getWarehouseStr(const vector<Obstacle>& obstacles) {
+
+void Warehouse::updateWarehouse(const vector<Robot>& robots, int steps) {
+    time += steps;
+}
+
+string Warehouse::getWarehouseStr() {
     stringstream ss;
-    updateWarehouse(obstacles);
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             ss << " " << warehouse[i][j] << " ";
@@ -104,6 +103,7 @@ int Warehouse::dfs(pair<int, int> currentCoord, map<pair<int, int>, bool>& visit
         }
     }
 
+    // Recursively call the dfs function for every unvisited adjacent space
     for (auto& i : adjacent) {
         if (!visited[i]) {
             numSpacesFound += dfs(i, visited);

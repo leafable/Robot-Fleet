@@ -12,7 +12,7 @@ System::~System() {
 }
 
 void System::printWarehouse() {
-    cout << warehouse.getWarehouseStr(*obstacles.getObstacles());
+    cout << warehouse.getWarehouseStr();
 }
 
 void System::printTempWarehouse() {
@@ -21,79 +21,94 @@ void System::printTempWarehouse() {
 
 void System::runProcess() {
 
-    int selection_1{};
+    int selection_main{};
+    int numSteps = 1;
 
     do {
-        int selection_1_2{};
+        int selection_tasks{};
 
-        int selection_1_3{};
-        int selection_1_3_1{};
-        int selection_1_3_2{};
-        int selection_1_3_3{};
+        int selection_config{};
+        int temp_numSteps{};
+        int temp_numObstacles{};
+        int temp_warehouseSize{};
+        int temp_seed{};
 
         printWarehouse();
 
         cout << endl;
-        cout << "1). Advance simulation 1 step" << endl;
+        cout << "1). Advance simulation " << numSteps << " step" << endl;
         cout << "2). Assign a task to a robot" << endl;
         cout << "3). Configuration" << endl;
         cout << "4). Exit" << endl;
 
-        selection_1 = getSelection(1, 4, true);
+        selection_main = getSelection(1, 4, true);
 
         // Main menu
-        if (selection_1 == 1) {
-            // Advance simulation 1 step
+        if (selection_main == 1) {
+            // Advance simulation (no sub menu?)
+
         }
-        else if (selection_1 == 2) {
-            // Assign a task to a robot
+        else if (selection_main == 2) {
+            // Assign a task to a robot (sub menu)
+
         }
-        else if (selection_1 == 3) {
-            cout << "1). Change warehouse size" << endl;
+        else if (selection_main == 3) {
+            // Configuration (sub menu)
+            cout << "1). Change simulation increment interval" << endl;
             cout << "2). Change number of obstacles" << endl;
-            cout << "3). Set warehouse seed" << endl;
-            selection_1_3 = getSelection(1, 3, true);
+            cout << "3). Change warehouse size" << endl;
+            cout << "4). Set warehouse seed" << endl;
+            cout << "5). Main menu" << endl;
+            selection_config = getSelection(1, 5, true);
         }
-        else if (selection_1 == 4) {
+        else if (selection_main == 4) {
+            // Exit
             cout << "Exiting..." << endl;
         }
 
 
-        // Sub menu #2
-        if (selection_1_2 == 1) {
+        // Logic for tasks sub menu
+        if (selection_tasks == 1) {
 
         }
-        else if (selection_1_2 == 2) {
+        else if (selection_tasks == 2) {
 
         }
 
 
-        // Sub menu #3
-        if (selection_1_3 == 1) {
-            cout << "Current warehouse size: " << warehouse.getWarehouseSize() << endl;
-            selection_1_3_1 = getSelection(5, 0, false, "Warehouse size: ", "Error: Invalid warehouse size (5+)");
-            warehouse = Warehouse(selection_1_3_1);
-            obstacles = ObstacleManager(selection_1_3_1, warehouse, obstacles.getSeed());
+        // Logic for config sub menu
+        if (selection_config == 1) {
+            cout << "Current increment interval: " << numSteps << endl;
+            temp_numSteps = getSelection(1, 10, true, "Steps: ", "Error: Invalid step count (1-10)");
+            numSteps = temp_numSteps;
         }
-        else if (selection_1_3 == 2) {
+        else if (selection_config == 2) {
             cout << "Current number of obstacles: " << obstacles.getNumObstacles() << endl;
-            selection_1_3_2 = getSelection(0, 0, false, "Number of obstacles: ", "Error: Invalid number of obstacles (0+)");
-            obstacles = ObstacleManager(selection_1_3_2, warehouse, obstacles.getSeed());
+            temp_numObstacles = getSelection(0, 0, false, "Number of obstacles: ", "Error: Invalid number of obstacles (0+)");
+            warehouse = Warehouse(warehouse.getWarehouseSize());
+            obstacles = ObstacleManager(temp_numObstacles, warehouse, obstacles.getSeed());
         }
-        else if (selection_1_3 == 3) {
+        else if (selection_config == 3) {
+            cout << "Current warehouse size: " << warehouse.getWarehouseSize() << endl;
+            temp_warehouseSize = getSelection(5, 0, false, "Warehouse size: ", "Error: Invalid warehouse size (5+)");
+            warehouse = Warehouse(temp_warehouseSize);
+            obstacles = ObstacleManager(temp_warehouseSize, warehouse, obstacles.getSeed());
+        }
+        else if (selection_config == 4) {
             cout << "Current seed: " << obstacles.getSeed() << endl;
-            selection_1_3_3 = getSelection(0, 0, false, "Set seed: ", "Error: Invalid seed (0+)");
-            obstacles = ObstacleManager(obstacles.getNumObstacles(), warehouse, selection_1_3_3);
+            temp_seed = getSelection(0, 0, false, "Set seed: ", "Error: Invalid seed (0+)");
+            warehouse = Warehouse(warehouse.getWarehouseSize());
+            obstacles = ObstacleManager(obstacles.getNumObstacles(), warehouse, temp_seed);
         }
 
-    } while (selection_1 != 4);
+    } while (selection_main != 5);
 }
 
-int System::getSelection(int min, int max, bool bounded) {
+int System::getSelection(const int min, const int max, const bool bounded) {
     return getSelection(min, max, bounded, "Enter selection: ", "Error: Invalid input: ");
 }
 
-int System::getSelection(int min, int max, bool bounded, const string& text, const string& error) {
+int System::getSelection(const int min, const int max, const bool bounded, const string& text, const string& error) {
     int selection{};
     bool flag{};
 
@@ -111,7 +126,7 @@ int System::getSelection(int min, int max, bool bounded, const string& text, con
         }
         // If unbounded, then either selection must be greater than start, or less than end
         else {
-            // If both min and max == 0, then selection must be greater than min (arbitrary)
+            // If both min and max == 0, arbitrarily assume selection must be positive
             if (min == 0 && max == 0) {
                 flag = !(cin >> selection) || selection < min;
             }
