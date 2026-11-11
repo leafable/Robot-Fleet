@@ -3,6 +3,7 @@
 
 RobotManager::RobotManager() {
     Robot r = Robot('A', 100, {0, 0}, "idle");
+    robots.push_back(r);
     numRobots = 1;
 }
 
@@ -10,6 +11,7 @@ RobotManager::RobotManager(int n) {
     for (int i = 0; i < n; i++) {
         char c = 65 + i;
         Robot r = Robot(c, 100, {0, i}, "idle");
+        robots.push_back(r);
     }
     numRobots = n;
 }

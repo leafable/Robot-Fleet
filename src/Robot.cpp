@@ -75,7 +75,7 @@ int Robot::calcH (const Point a, const Point b) {
     return abs(a.x - b.x) + abs(a.y - b.y);
 }
 
-vector<Point> Robot::searchPath(TempWarehouse& w, Task& t) {
+vector<Point> Robot::searchPath(Warehouse& w, Task& t) {
     const vector<vector<char>> grid = {
     {'.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.', '.'}, // 01
     {'.', '.', '.', 'o', 'o', 'o', 'o', 'o', '.', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.', '.'}, // 02
