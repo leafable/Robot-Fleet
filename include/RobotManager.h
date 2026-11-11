@@ -1,20 +1,24 @@
-//
-// Created by leafy on 10/20/2026.
-//
-
 #ifndef ROBOT_FLEET_ROBOTMANAGER_H
 #define ROBOT_FLEET_ROBOTMANAGER_H
+#include <utility>
+#include <vector>
 
+class Robot;
 
 class RobotManager {
-    public:
+public:
     RobotManager();
-    ~RobotManager();
-    void moveRobot(Robot* r);
-    pair<int, int> nextMove(Robot* r)
+    RobotManager(int n);
+    ~RobotManager() = default;
 
-    private:
-    vector<Robot> robots;
+    void addRobot(Robot &r);
+    void moveRobot();
+    std::pair<int, int> nextMove(Robot &r);
+    const std::vector<Robot>& getRobots() const;
+
+private:
+    std::vector<Robot> robots;
+    int numRobots;
 };
 
 
