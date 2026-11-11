@@ -1,17 +1,11 @@
-#include "Robot.h"
-//
-// Created by leafy on 10/20/2026.
-//
-
 #include <string>
 #include <utility>
 
-#include "Robot.h"
-
 #include <iostream>
 
-#include "Task.h"
-#include "Warehouse.h"
+#include "../include/Robot.h"
+#include "../include/Task.h"
+#include "../include/Warehouse.h"
 
 
 Robot::Robot(const char c, const int b, const std::pair<int, int> p, std::string s)

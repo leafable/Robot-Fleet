@@ -1,5 +1,5 @@
-#include "RobotManager.h"
-#include "Robot.h"
+#include "../include/RobotManager.h"
+#include "../include/Robot.h"
 
 RobotManager::RobotManager() {
     Robot r = Robot('A', 100, {0, 0}, "idle");

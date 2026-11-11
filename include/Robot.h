@@ -6,7 +6,7 @@
 
 
 class Task;
-class TempWarehouse;
+class Warehouse;
 using namespace std;
 
 //Create a struct to implement A* search
@@ -51,7 +51,7 @@ public:
 
     int calcH(Point a, Point b);
 
-    vector<Point> searchPath(TempWarehouse &w, Task &t);
+    vector<Point> searchPath(Warehouse &w, Task &t);
 
 private:
     stack<pair <int, int>> path;
