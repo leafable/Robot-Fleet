@@ -6,6 +6,7 @@
 #define ROBOT_FLEET_OBSTACLE_H
 #include <vector>
 #include <random>
+#include "Point.h"
 
 using namespace std;
 
@@ -13,13 +14,14 @@ class Warehouse;
 
 class Obstacle {
 private:
-    pair<int, int> origin; // at the top left of the obstacle
-    pair<int, int> size; // how far down/right the object extends from the origin
+
+    Point origin; // at the top left of the obstacle
+    Point size; // how far down/right the object extends from the origin
 public:
     Obstacle(int warehouseSize, mt19937& seed);
-    pair<int, int> getOrigin() const;
-    pair<int, int> getSize() const;
-    vector<pair<int, int>> getCoords() const;
+    Point getOrigin() const;
+    Point getSize() const;
+    vector<Point> getCoords() const;
     int getLeftBoundary() const;
     int getRightBoundary() const;
     int getUpperBoundary() const;

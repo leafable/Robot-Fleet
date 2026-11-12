@@ -8,12 +8,15 @@
 #include "Warehouse.h"
 #include "TempWarehouse.h"
 #include "ObstacleManager.h"
+#include "TaskManager.h"
 
 class System {
 private:
     Warehouse warehouse;
     TempWarehouse tempWarehouse;
     ObstacleManager obstacles;
+    RobotManager robots;
+    TaskManager tasks;
 
     int getSelection(int min, int max, bool bounded);
     int getSelection(int min, int max, bool bounded, const string& text, const string& error);

@@ -4,16 +4,17 @@
 
 #include "ObstacleManager.h"
 
+#include <iostream>
+#include <map>
+
 #include "Warehouse.h"
 
-int ObstacleManager::warehouseSeed = random_device{}();
-
 // If no seed is provided, pass the randomly generated seed
-ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse) : ObstacleManager(targetNumObstacles, warehouse, warehouseSeed) {}
+ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse) : ObstacleManager(targetNumObstacles, warehouse, warehouse.getWarehouseSeed()) {}
 
 ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse, int setSeed) : numSpacesTaken(0) {
 
-    warehouseSeed = setSeed;
+    warehouse.setWarehouseSeed(setSeed);
     mt19937 seed(setSeed);
 
     // If the passed value is less than 1, no obstacles are created
@@ -37,20 +38,20 @@ ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& wareho
         }
 
         // Temporarily update the warehouse
-        warehouse.updateWarehouse(candidate, true);
+        warehouse.drawObstacles(candidate, true);
 
         // If the total number of air spaces is greater than the number of air spaces found
         // by the dfs algorithm, then the candidate obstacle is separating the warehouse
         // into islands that the robot cannot cross. Discard the candidate obstacle.
         const auto start = warehouse.findDfsStart();
-        numSpacesTaken += candidate.getSize().first * candidate.getSize().second;
+        numSpacesTaken += candidate.getSize().x * candidate.getSize().y;
         const int numAirSpaces = warehouse.getWarehouseSize() * warehouse.getWarehouseSize() - numSpacesTaken;
-        map<pair<int, int>, bool> visited;
+        map<Point, bool> visited;
 
-        if (start.first == -1 && start.second == -1 || warehouse.dfs(start, visited) < numAirSpaces) {
+        if (start.x == -1 && start.y == -1 || warehouse.dfs(start, visited) < numAirSpaces) {
             attempts++;
-            numSpacesTaken -= candidate.getSize().first * candidate.getSize().second;
-            warehouse.updateWarehouse(candidate, false);
+            numSpacesTaken -= candidate.getSize().x * candidate.getSize().y;
+            warehouse.drawObstacles(candidate, false);
             continue;
         }
 
@@ -76,12 +77,12 @@ bool ObstacleManager::hasOverlap(const Obstacle& obstacle2) const {
     return 0;
 }
 
-bool ObstacleManager::hasOverlap(const pair<int,int>& coord) const {
+bool ObstacleManager::hasOverlap(const Point& coord) const {
     for (const auto& obstacle : obstacles) {
         // Check if the point overlaps the obstacle on the x axis
-        if (obstacle.getRightBoundary() >= coord.first && obstacle.getLeftBoundary() <= coord.first) {
+        if (obstacle.getRightBoundary() >= coord.x && obstacle.getLeftBoundary() <= coord.x) {
             // Check if the point overlaps the obstacle on the y axis
-            if (obstacle.getUpperBoundary() >= coord.second && obstacle.getLowerBoundary() <= coord.second) {
+            if (obstacle.getUpperBoundary() >= coord.y && obstacle.getLowerBoundary() <= coord.y) {
                 return 1;
             }
         }
@@ -95,10 +96,6 @@ const vector<Obstacle>* ObstacleManager::getObstacles() const {
 
 int ObstacleManager::getNumSpacesTaken() const {
     return numSpacesTaken;
-}
-
-int ObstacleManager::getSeed() const {
-    return warehouseSeed;
 }
 
 int ObstacleManager::getNumObstacles() const {

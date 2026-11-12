@@ -9,27 +9,39 @@
 #include <sstream>
 #include <vector>
 #include <iomanip>
+#include <map>
+
 #include "ObstacleManager.h"
 #include "RobotManager.h"
+#include "Point.h"
 
 class Obstacle;
+class Robot;
+class Task;
 
 using namespace std;
 
 class Warehouse {
 private:
     vector<vector<char>> warehouse; // https://www.geeksforgeeks.org/cpp/different-ways-to-initialize-a-map-in-cpp/
+    static int warehouseSeed;
     int size;
-    int time;
 public:
     Warehouse(int size);
-    void updateWarehouse(const Obstacle& obstacle, bool additive);
-    void updateWarehouse(const vector<Robot>& robots, int steps);
+    void drawObstacles(const Obstacle& obstacle, bool additive);
+
+    void drawRobots(vector<Robot> &robots);
+
+    void updateRobots(vector<Robot>& robots);
+    void drawTasks(vector<Task> &tasks);
     string getWarehouseStr();
     int getWarehouseSize() const;
     const vector<vector<char>> *getWarehouse() const;
-    pair<int, int> findDfsStart();
-    int dfs(pair<int, int> currentCoord, map<pair<int, int>, bool>& visited);
+    Point findDfsStart();
+    int dfs(Point currentCoord, map<Point, bool>& visited);
+    bool isAir(Point) const;
+    int getWarehouseSeed() const;
+    void setWarehouseSeed(int warehouseSeed);
 };
 
 
