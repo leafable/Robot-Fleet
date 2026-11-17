@@ -1,11 +1,10 @@
-//
-// Created by leafy on 10/20/2026.
-//
-
 #include "System.h"
 
-System::System() : warehouse(20), tempWarehouse(5), obstacles(warehouse.getWarehouseSize(), warehouse, 10), robots(warehouse) {
-    tasks.addTask(Task('A', warehouse));
+int System::randomSeed = random_device{}();
+int System::numRobots = 3;
+int System::numTasks = 3;
+
+System::System() : seed(randomSeed), warehouse(20), obstacles(warehouse.getWarehouseSize(), warehouse, seed), robots(warehouse, seed, numRobots), tasks('A', warehouse, seed, numTasks) {
 }
 
 System::~System() = default;
@@ -14,14 +13,13 @@ void System::printWarehouse() {
     cout << warehouse.getWarehouseStr();
 }
 
-void System::printTempWarehouse() {
-    cout << tempWarehouse.getTempWarehouseStr();
-}
-
 void System::runProcess() {
 
     int selection_main{};
     int numSteps = 1;
+    vector<int> noTasksCounter(robots.getNumRobots());
+    string statusStr;
+    string tasksStr;
 
     do {
         int selection_tasks{};
@@ -30,69 +28,143 @@ void System::runProcess() {
         int temp_numSteps{};
         int temp_numObstacles{};
         int temp_warehouseSize{};
-        int temp_seed{};
         Point temp_pickupCoord{};
         Point temp_dropoffCoord{};
 
-        warehouse.drawTasks(tasks.getTasks());
+        warehouse.drawTasks(tasks.getTasks(), activeTasks);
         warehouse.drawRobots(robots.getRobots());
+        activeTasks.resize(robots.getNumRobots());
         printWarehouse();
 
-        for (auto& task : tasks.getTasks()) {
-            cout << task.getPickupPosition().x << " " << task.getPickupPosition().y << endl;
-            cout << task.getDropoffPosition().x << " " << task.getDropoffPosition().y << endl;
+        if (!statusStr.empty()) {
+            cout << endl << statusStr;
+            statusStr.clear();
+        }
+
+        if (!tasksStr.empty()) {
+            cout << endl << tasksStr << endl;
+            tasksStr.clear();
+        }
+
+        bool printed{};
+        for (int i = 0; auto& it : noTasksCounter) {
+            if (it) {
+                cout << endl << "Robot " << i + 1 << ": No existing tasks! [x" << it << "]";
+                printed = true;
+            }
+            i++;
+        }
+
+        // Extra padding
+        if (printed) {
+            cout << endl;
         }
 
         cout << endl;
         cout << "1). Advance simulation " << numSteps << " step" << endl;
-        cout << "2). Create a new task" << endl;
-        cout << "3). Get status of robots" << endl;
-        cout << "4). Configuration" << endl;
-        cout << "5). Exit" << endl;
+        cout << "2). Display robot/task status" << endl;
+        cout << "3). View all tasks" << endl;
+        cout << "4). Create a new task" << endl;
+        cout << "5). Configuration" << endl;
+        cout << "6). Exit" << endl;
 
-        selection_main = getSelection(1, 5, true);
+        selection_main = getSelection(1, 6, true);
 
         // Main menu logic
         if (selection_main == 1) {
             // Advance simulation
-            for (auto& robot : robots.getRobots()) {
-                if (robot.getStatus() == "idle" && tasks.getSize()) {
-                    Task task = tasks.popTask();
-                    robot.pushPath(robot.searchPath(warehouse, task));
-                    robot.pushPath(robot.searchPath(warehouse, robot.getPosition(), task.getPickupPosition()));
+            for (int i = 0; auto& robot : robots.getRobots()) {
+                for (int j = 0; j < numSteps; j++) {
+                    if (robot.getStatus() == "Idle" && tasks.getSize()) {
+                        noTasksCounter[i] = {};
+                        activeTasks[i] = Task(tasks.popTask());
+                        robot.searchPath(warehouse, activeTasks[i].getPickupPosition(), activeTasks[i].getDropoffPosition());
+                        robot.searchPath(warehouse, robot.getPosition(), activeTasks[i].getPickupPosition());
+                    }
+                    else if (robot.getStatus() == "Idle" && !tasks.getSize()) {
+                        activeTasks[i] = {};
+                        noTasksCounter[i]++;
+                    }
+                    warehouse.updateRobot(robot, activeTasks[i]);
+                    warehouse.updateTask(robot, activeTasks[i]);
                 }
-                else if (robot.getStatus() == "idle" && !tasks.getSize()) {
-                    cout << "Error: No existing tasks" << endl;
-                }
-
-                // if (robot.getBattery() >= 50) {
-                    warehouse.updateRobots(robots.getRobots());
-                // }
+                i++;
             }
         }
         else if (selection_main == 2) {
+            // Print the status of each robot
+            stringstream ss;
+            for (int i = 0; const auto& robot : robots.getRobots()) {
+                ss << "Robot " << robot.getName() - 48 << " | ";
+                ss << "Status: " << setw(8) << right << robot.getStatus() << " | ";
+                ss << "Battery: " << setw(2) << right << robot.getBattery() << "% | ";
+                if (activeTasks[i].getPickupName() != ' ' && activeTasks[i].getDropoffName() != ' ') {
+                    ss << "Task: " << activeTasks[i].getPickupName() << " -> " << activeTasks[i].getDropoffName() << " | ";
+                    ss << "Carrying: " << setw(3) << right << (robot.isCarrying() ? "Yes" : "No") << " | ";
+                    ss << "Progress: Moving towards " << (robot.isCarrying() ? activeTasks[i].getDropoffName() : activeTasks[i].getPickupName());
+                }
+                else {
+                    ss << "Task: " << setw(6) << right << "None" << " | ";
+                    ss << "Carrying: " << setw(3) << right << "No" << " | ";
+                    ss << "Progress: N/A";
+                }
+                ss << endl;
+                i++;
+            }
+            statusStr = ss.str();
+        }
+        else if (selection_main == 3) {
+            // View all tasks
+            stringstream ss;
+
+            ss << "Active tasks:";
+            bool containsActiveTasks{};
+            for (const auto& task : activeTasks) {
+                if (task.getPickupName() != ' ' && task.getDropoffName() != ' ') {
+                    ss << endl << task.getPickupName() << "(" << setfill('0') << setprecision(2) << task.getPickupPosition().x + 1 << ", " << setfill('0') << setprecision(2) << setw(2) << right << task.getPickupPosition().y + 1 << ") -> " <<
+                        task.getDropoffName() << "(" << setfill('0') << setprecision(2) << setw(2) << right << task.getDropoffPosition().x + 1 << ", " << setfill('0') << setprecision(2) << setw(2) << right << task.getDropoffPosition().y + 1 << ")";
+                    containsActiveTasks = true;
+                }
+            }
+
+            // If no points are displayed, print N/A
+            if (!containsActiveTasks) {
+                ss << " N/A";
+            }
+
+            ss << endl << endl << "Queued tasks:";
+            bool containsQueuedTasks{};
+            for (const auto& task : tasks.getTasks()) {
+                ss << endl << task.getPickupName() << "(" << setfill('0') << setprecision(2) << setw(2) << right << task.getPickupPosition().x + 1 << ", " << setfill('0') << setprecision(2) << setw(2) << right << task.getPickupPosition().y + 1 << ") -> " <<
+                    task.getDropoffName() << "(" << setfill('0') << setprecision(2) << setw(2) << right << task.getDropoffPosition().x + 1 << ", " << setfill('0') << setprecision(2) << setw(2) << right << task.getDropoffPosition().y + 1 << ")";
+                containsQueuedTasks = true;
+            }
+
+            // If no points are displayed, print N/A
+            if (!containsQueuedTasks) {
+                ss << " N/A";
+            }
+
+            tasksStr = ss.str();
+        }
+        else if (selection_main == 4) {
             // Assign a task to a robot
-            cout << "1). Randomize pickup/dropoff locations" << endl;
+            cout << "1). Randomize task pickup/dropoff locations" << endl;
             cout << "2). Manually input pickup/dropoff locations" << endl;
             cout << "3). Main menu" << endl;
             selection_tasks = getSelection(1, 3, true);
         }
-        else if (selection_main == 3) {
-            // Print the status of each robot
-            for (const auto& robot : robots.getRobots()) {
-                cout << "Robot " << robot.getName() << " -> " << "Station " << robot.getStatus() << endl;
-            }
-        }
-        else if (selection_main == 4) {
+        else if (selection_main == 5) {
             // Configuration (sub menu)
             cout << "1). Change simulation increment interval" << endl;
             cout << "2). Change number of obstacles" << endl;
             cout << "3). Change warehouse size" << endl;
             cout << "4). Set warehouse seed" << endl;
-            cout << "5). Main menu" << endl;
-            selection_config = getSelection(1, 5, true);
+            cout << "5). Reset warehouse" << endl;
+            cout << "6). Main menu" << endl;
+            selection_config = getSelection(1, 6, true);
         }
-        else if (selection_main == 5) {
+        else if (selection_main == 6) {
             // Exit
             cout << "Exiting..." << endl;
         }
@@ -100,8 +172,6 @@ void System::runProcess() {
 
         // Logic for tasks sub menu
         if (selection_tasks == 1) {
-            mt19937 seed(warehouse.getWarehouseSeed());
-
             // Roll for a valid pickupCoord
             Point pickupCoord;
             do {
@@ -118,12 +188,7 @@ void System::runProcess() {
                 dropoffCoord = {dropoffX(seed), dropoffY(seed)};
             } while (!warehouse.isAir(dropoffCoord));
 
-            if (tasks.getSize()) {
-                tasks.addTask(Task(static_cast<char>(tasks.getTasks().back().getName() + 1) ,pickupCoord, dropoffCoord));
-            }
-            else {
-                tasks.addTask(Task('A', pickupCoord, dropoffCoord));
-            }
+            tasks.addTask(Task(tasks.getSize() ? tasks.getTasks().back().getDropoffName() + 1 : 'A', pickupCoord, dropoffCoord));
         }
         else if (selection_tasks == 2) {
             // Ask the user for a valid pickup location
@@ -133,7 +198,7 @@ void System::runProcess() {
                 temp_pickupCoord.x--;
                 temp_pickupCoord.y--;
                 if (!warehouse.isAir(temp_pickupCoord)) {
-                    cout << "Error: Coordinate is occupied" << endl;
+                    cout << "Error: Coordinate is occupied!" << endl;
                 }
             } while (!warehouse.isAir(temp_pickupCoord));
 
@@ -144,17 +209,12 @@ void System::runProcess() {
                 temp_dropoffCoord.x--;
                 temp_dropoffCoord.y--;
                 if (!warehouse.isAir(temp_pickupCoord)) {
-                    cout << "Error: Coordinate is occupied" << endl;
+                    cout << "Error: Coordinate is occupied!" << endl;
                 }
             } while (!warehouse.isAir(temp_dropoffCoord));
 
-            // Put the new task on the stack
-            if (tasks.getSize()) {
-                tasks.addTask(Task(static_cast<char>(tasks.getTasks().back().getName() + 1), temp_pickupCoord, temp_dropoffCoord));
-            }
-            else {
-                tasks.addTask(Task('A', temp_pickupCoord, temp_dropoffCoord));
-            }
+            // Push the new task onto the vector of tasks
+            tasks.addTask(Task(tasks.getSize() ? tasks.getTasks().back().getDropoffName() + 1 : 'A', temp_pickupCoord, temp_dropoffCoord));
         }
 
 
@@ -167,23 +227,47 @@ void System::runProcess() {
         else if (selection_config == 2) {
             cout << "Current number of obstacles: " << obstacles.getNumObstacles() << endl;
             temp_numObstacles = getSelection(0, 0, false, "Number of obstacles: ", "Error: Invalid number of obstacles (0+)");
+            seed.seed(randomSeed);
             warehouse = Warehouse(warehouse.getWarehouseSize());
-            obstacles = ObstacleManager(temp_numObstacles, warehouse, warehouse.getWarehouseSeed());
+            obstacles = ObstacleManager(temp_numObstacles, warehouse, seed);
+            robots = RobotManager(warehouse, seed, robots.getNumRobots());
+            tasks = TaskManager('A', warehouse, seed, numTasks);
+            activeTasks.clear();
+            noTasksCounter.clear();
         }
         else if (selection_config == 3) {
             cout << "Current warehouse size: " << warehouse.getWarehouseSize() << endl;
             temp_warehouseSize = getSelection(5, 0, false, "Warehouse size: ", "Error: Invalid warehouse size (5+)");
+            seed.seed(randomSeed);
             warehouse = Warehouse(temp_warehouseSize);
-            obstacles = ObstacleManager(temp_warehouseSize, warehouse, warehouse.getWarehouseSeed());
+            obstacles = ObstacleManager(temp_warehouseSize, warehouse, seed);
+            robots = RobotManager(warehouse, seed, robots.getNumRobots());
+            tasks = TaskManager('A', warehouse, seed, numTasks);
+            activeTasks.clear();
+            noTasksCounter.clear();
         }
         else if (selection_config == 4) {
-            cout << "Current seed: " << warehouse.getWarehouseSeed() << endl;
-            temp_seed = getSelection(0, 0, false, "Set seed: ", "Error: Invalid seed (0+)");
+            cout << "Current seed: " << randomSeed << endl;
+            randomSeed = getSelection(0, 0, false, "Set seed: ", "Error: Invalid seed (0+)");
+            seed.seed(randomSeed);
             warehouse = Warehouse(warehouse.getWarehouseSize());
-            obstacles = ObstacleManager(obstacles.getNumObstacles(), warehouse, temp_seed);
+            obstacles = ObstacleManager(obstacles.getNumObstacles(), warehouse, seed);
+            robots = RobotManager(warehouse, seed, robots.getNumRobots());
+            tasks = TaskManager('A', warehouse, seed, numTasks);
+            activeTasks.clear();
+            noTasksCounter.clear();
+        }
+        else if (selection_config == 5) {
+            seed.seed(randomSeed);
+            warehouse = Warehouse(warehouse.getWarehouseSize());
+            obstacles = ObstacleManager(obstacles.getNumObstacles(), warehouse, seed);
+            robots = RobotManager(warehouse, seed, robots.getNumRobots());
+            tasks = TaskManager('A', warehouse, seed, numTasks);
+            activeTasks.clear();
+            noTasksCounter.clear();
         }
 
-    } while (selection_main != 5);
+    } while (selection_main != 6);
 }
 
 int System::getSelection(const int min, const int max, const bool bounded) {

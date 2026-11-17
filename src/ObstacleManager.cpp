@@ -1,22 +1,12 @@
-//
-// Created by leafy on 10/20/2026.
-//
-
 #include "ObstacleManager.h"
-
+#include "Warehouse.h"
 #include <iostream>
 #include <map>
 
-#include "Warehouse.h"
-
 // If no seed is provided, pass the randomly generated seed
-ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse) : ObstacleManager(targetNumObstacles, warehouse, warehouse.getWarehouseSeed()) {}
+// ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse) : ObstacleManager(targetNumObstacles, warehouse, warehouse.getWarehouseSeed()) {}
 
-ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse, int setSeed) : numSpacesTaken(0) {
-
-    warehouse.setWarehouseSeed(setSeed);
-    mt19937 seed(setSeed);
-
+ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse, mt19937& seed) : numSpacesTaken(0) {
     // If the passed value is less than 1, no obstacles are created
     if (targetNumObstacles < 1) {
         return;
@@ -70,11 +60,11 @@ bool ObstacleManager::hasOverlap(const Obstacle& obstacle2) const {
         if (obstacle1.getRightBoundary() >= obstacle2.getLeftBoundary() && obstacle1.getLeftBoundary() <= obstacle2.getRightBoundary()) {
             // Check if the obstacles overlap on the y axis
             if (obstacle1.getUpperBoundary() >= obstacle2.getLowerBoundary() && obstacle1.getLowerBoundary() <= obstacle2.getUpperBoundary()) {
-                return 1;
+                return true;
             }
         }
     }
-    return 0;
+    return false;
 }
 
 bool ObstacleManager::hasOverlap(const Point& coord) const {
@@ -83,11 +73,11 @@ bool ObstacleManager::hasOverlap(const Point& coord) const {
         if (obstacle.getRightBoundary() >= coord.x && obstacle.getLeftBoundary() <= coord.x) {
             // Check if the point overlaps the obstacle on the y axis
             if (obstacle.getUpperBoundary() >= coord.y && obstacle.getLowerBoundary() <= coord.y) {
-                return 1;
+                return true;
             }
         }
     }
-    return 0;
+    return false;
 }
 
 const vector<Obstacle>* ObstacleManager::getObstacles() const {

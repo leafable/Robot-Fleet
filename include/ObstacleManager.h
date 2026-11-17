@@ -1,7 +1,3 @@
-//
-// Created by leafy on 10/20/2026.
-//
-
 #ifndef ROBOT_FLEET_OBSTACLEMANAGER_H
 #define ROBOT_FLEET_OBSTACLEMANAGER_H
 #include "Obstacle.h"
@@ -14,8 +10,8 @@ private:
     vector<Obstacle> obstacles;
     int numSpacesTaken;
 public:
-    ObstacleManager(int targetNumObstacles, Warehouse& warehouse);
-    ObstacleManager(int targetNumObstacles, Warehouse& warehouse, int setSeed);
+    // ObstacleManager(int targetNumObstacles, Warehouse& warehouse);
+    ObstacleManager(int targetNumObstacles, Warehouse& warehouse, mt19937& seed);
     bool hasOverlap(const Obstacle& obstacle2) const;
     bool hasOverlap(const Point& coord) const;
     const vector<Obstacle>* getObstacles() const;

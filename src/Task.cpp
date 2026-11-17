@@ -1,11 +1,24 @@
 #include "Task.h"
-
+#include "TaskManager.h"
 #include <random>
 
-Task::Task(const char name, const Warehouse& warehouse) {
-    mt19937 seed(warehouse.getWarehouseSeed());
+Task::Task() {
+    this->pickupName = ' ';
+    this->dropoffName = ' ';
+    this->pickup = {-1, -1};
+    this->dropoff = {-1, -1};
+}
 
-    this->name = name;
+Task::Task(char startName, const Point &pickup, const Point &dropoff){
+    this->pickupName = startName;
+    this->dropoffName = startName + 1;
+    this->pickup = pickup;
+    this->dropoff = dropoff;
+}
+
+Task::Task(char startName, const Warehouse& warehouse, mt19937& seed){
+    this->pickupName = startName;
+    this->dropoffName = startName + 1;
 
     // Roll for a valid pickupCoord
     Point pickupCoord;
@@ -26,14 +39,12 @@ Task::Task(const char name, const Warehouse& warehouse) {
     this->dropoff = dropoffCoord;
 }
 
-Task::Task(const char name, const Point &pickup, const Point &dropoff) {
-    this->name = name;
-    this->pickup = pickup;
-    this->dropoff = dropoff;
+char Task::getPickupName() const {
+    return pickupName;
 }
 
-char Task::getName() const {
-    return name;
+char Task::getDropoffName() const {
+    return dropoffName;
 }
 
 Point Task::getPickupPosition() const{
@@ -42,4 +53,20 @@ Point Task::getPickupPosition() const{
 
 Point Task::getDropoffPosition() const{
     return dropoff;
+}
+
+void Task::setPickupPosition(const Point& coord) {
+    this->pickup = coord;
+}
+
+void Task::setDropoffPosition(const Point& coord) {
+    this->dropoff = coord;
+}
+
+void Task::setPickupName(const char name) {
+    this->pickupName = name;
+}
+
+void Task::setDropoffName(const char name) {
+    this->dropoffName = name;
 }

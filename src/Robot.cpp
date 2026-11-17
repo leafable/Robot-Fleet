@@ -1,12 +1,12 @@
-#include "../include/Robot.h"
+#include "Robot.h"
+#include "Task.h"
 #include <utility>
 #include <algorithm>
 #include <queue>
 #include <iostream>
-#include "Task.h"
 
-Robot::Robot(const int n, const int b, const Point &p, std::string s)
-    : name(n), battery(b), position(p), status(std::move(s))
+Robot::Robot(const int n, const int b, const Point &p, string  s)
+    : name(n), battery(b), position(p), status(std::move(s)), carry(false)
 {
 }
 
@@ -31,7 +31,8 @@ Point Robot::getPosition() const {
 }
 
 void Robot::setPosition(const Point &p) {
-    position = p;
+    if (p.x >= 0 && p.y >= 0)
+        position = p;
 }
 
 string Robot::getStatus() const {
@@ -77,11 +78,11 @@ int Robot::calcH (const Point a, const Point b) {
     return abs(a.x - b.x) + abs(a.y - b.y);
 }
 
-vector<Point> Robot::searchPath(Warehouse& w, Task& t) {
-    return searchPath(w, t.getPickupPosition(), t.getDropoffPosition());
-}
+// vector<Point> Robot::searchPath(Warehouse& w, Task& t) {
+//     return searchPath(w, t.getPickupPosition(), t.getDropoffPosition());
+// }
 
-vector<Point> Robot::searchPath(const Warehouse& w, const Point &pickup, const Point &dropoff) {
+void Robot::searchPath(const Warehouse& w, const Point &pickup, const Point &dropoff) {
     // const vector<vector<char>> grid = {
     // {'.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.', '.'}, // 01
     // {'.', '.', '.', 'o', 'o', 'o', 'o', 'o', '.', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.', '.'}, // 02
@@ -120,7 +121,7 @@ vector<Point> Robot::searchPath(const Warehouse& w, const Point &pickup, const P
     int yend = dropoff.y;
 
     //Check that the initial positions are open
-    if ((grid[xint][yint] == '#') || (grid[xend][yend] == '#')) {
+    if ((grid[yint][xint] == '#') || (grid[yend][xend] == '#')) {
         cerr << "Path impossible!" << endl;
     }
 
@@ -137,7 +138,7 @@ vector<Point> Robot::searchPath(const Warehouse& w, const Point &pickup, const P
     //Open set: Create a priority queue based on the calculated weight
     priority_queue<Node, vector<Node>, greater<Node>> open;
 
-    gScore[xint][yint] = 0;
+    gScore[yint][xint] = 0;
     int hStart = calcH(start, goal);
 
     Node n = Node(start, 0, hStart, hStart);
@@ -158,7 +159,7 @@ vector<Point> Robot::searchPath(const Warehouse& w, const Point &pickup, const P
             break;
         }
 
-        if (current.g > gScore[current.point.x][current.point.y]) {
+        if (current.g > gScore[current.point.y][current.point.x]) {
             continue;
         }
 
@@ -166,12 +167,12 @@ vector<Point> Robot::searchPath(const Warehouse& w, const Point &pickup, const P
             Point neigh = {current.point.x + dx[i], current.point.y + dy[i]};
 
             if (neigh.x >= 0 && neigh.x < rows && neigh.y >= 0 && neigh.y < cols) {
-                if (grid[neigh.x][neigh.y] != '#') {
+                if (grid[neigh.y][neigh.x] != '#') {
                     int tempG = current.g + 1;
 
-                    if (tempG < gScore[neigh.x][neigh.y]) {
-                        gScore[neigh.x][neigh.y] = tempG;
-                        parentPath[neigh.x][neigh.y] = current.point;
+                    if (tempG < gScore[neigh.y][neigh.x]) {
+                        gScore[neigh.y][neigh.x] = tempG;
+                        parentPath[neigh.y][neigh.x] = current.point;
 
                         int h = calcH(neigh, goal);
 
@@ -184,35 +185,75 @@ vector<Point> Robot::searchPath(const Warehouse& w, const Point &pickup, const P
         }
     }
 
-    vector<Point> path;
+    // vector<Point> path;
 
     if (pathFound) {
         Point curr = goal;
 
         while (curr != start) {
-            path.push_back(curr);
-            curr = parentPath[curr.x][curr.y];  //should x and y be flipped?
+            path.push(curr);
+            curr = parentPath[curr.y][curr.x];  //should x and y be flipped?
         }
 
-        path.push_back(start);
+        // path.push(start);
         // reverse(path.begin(), path.end());
 
     }
 
-    return path;
+    // return path;
 }
 
-void Robot::moveRobot() {
-    if (isPathEmpty()) {
-        setStatus("idle");
+void Robot::moveRobot(Task &task) {
+    //When the robot has no charge the status is set to charging
+    if (getBattery() == 0) {
+        setStatus("Charging");
+    }
+
+    //When the charging status is set, it will only change when the robot
+    //is at full charge (5 moves)
+    if (getStatus() == "Charging" && getBattery() < 100) {
+        setBattery(getBattery() + 20);
         return;
     }
-    popPath();
+
+    //Once the robot is charged to 100, it will check and set the status for continuing moves
+    if (getStatus() == "Charging" && getBattery() == 100) {
+        setStatus(isPathEmpty() ? "Idle" : "Active");
+    }
+
+    if (isPathEmpty()) {
+        setStatus("Idle");
+        task = {};
+        carry = false;
+        return;
+    }
+
+    //This is where the robot is between 100 and 0, but not charging,
+    //they will simply process one move
     setPosition(peekPath());
-    setStatus("active");
-    setBattery((getBattery()-2));
+    path.pop();
+    if (position == task.getPickupPosition()) {
+        carry = true;
+    }
+    setStatus(isPathEmpty() ? "Idle" : "Active");
+    if (isPathEmpty()) {
+        task = {};
+        carry = false;
+    }
+    setBattery(getBattery() - 5);
 }
 
 Point Robot::nextMove() {
     return peekPath();
+}
+
+void Robot::printPath() {
+    for (int i = 0; i < path.size(); i++) {
+        cout << "(" << path.top().x + 1 << ", " << path.top().y + 1 << ")" << endl;
+        path.pop();
+    }
+}
+
+bool Robot::isCarrying() const {
+    return carry;
 }

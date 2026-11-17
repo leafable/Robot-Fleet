@@ -1,62 +1,115 @@
-//
-// Created by admin on 10/20/26.
-//
-
 #include "Warehouse.h"
-
-#include <map>
-
+#include <iostream>
 #include "Robot.h"
 #include "Task.h"
+#include <map>
+#include <memory>
+#include <queue>
 
 char air_symbol = '.';
 char obstacle_symbol = '#';
 
-int Warehouse::warehouseSeed = random_device{}();
-
 Warehouse::Warehouse(int size) {
     this->size = size;
+    robotsGrid.resize(size);
+    tasksGrid.resize(size);
     for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            warehouse.resize(size);
-            warehouse.at(i).push_back(air_symbol);
-        }
+        warehouseGrid.emplace_back(size, '.');
+        robotsGrid.at(i).resize(size);
+        tasksGrid.at(i).resize(size);
     }
 }
 
-void Warehouse::drawObstacles(const Obstacle& obstacle, bool additive) {
+void Warehouse::drawObstacles(const Obstacle& obstacle, const bool additive) {
     // Additive if mode == 1, subtractive if mode == 0
-    char ch = additive ? obstacle_symbol : air_symbol;
+    const char ch = additive ? obstacle_symbol : air_symbol;
 
     for (const auto& coord : obstacle.getCoords()) {
         // Check that the coord isn't outside the bounds of the warehouse
-        if (coord.x < size && coord.y < size) {
+        if (coord.x >= 0 && coord.y >= 0 && coord.x < size && coord.y < size) {
             // Occupy the coord with an obstacle/air depending on the mode
-            warehouse[coord.x][coord.y] = ch;
+            warehouseGrid[coord.y][coord.x] = ch;
         }
     }
 }
 
-void Warehouse::drawRobots(vector<Robot>& robots) {
+void Warehouse::drawRobots(const vector<Robot>& robots) {
     for (auto& robot : robots) {
-        if (robot.peekPath().x == -1 || robot.peekPath().y == -1) {
-            warehouse.at(robot.getPosition().x).at(robot.getPosition().y) = robot.getName();
+        // Check bounds
+        if (robot.getPosition().x >= 0 && robot.getPosition().y >= 0 &&
+            robot.getPosition().x < size && robot.getPosition().y < size)
+        {
+            robotsGrid.at(robot.getPosition().y).at(robot.getPosition().x) = robot.getName();
         }
     }
 }
 
-void Warehouse::updateRobots(vector<Robot>& robots) {
-    for (auto& robot : robots) {
-        warehouse.at(robot.getPosition().x).at(robot.getPosition().y) = air_symbol;
-        robot.moveRobot();
-        warehouse.at(robot.getPosition().x).at(robot.getPosition().y) = robot.getName();
+void Warehouse::updateRobot(Robot &robot, Task& task) {
+    // robotsGrid.clear();
+    // robotsGrid.resize(size);
+    // for (int i = 0; i < size; i++) {
+    //     robotsGrid.at(i).resize(size);
+    // }
+
+    // Check bounds
+    if (robot.getPosition().x >= 0 && robot.getPosition().y >= 0 &&
+        robot.getPosition().x < size && robot.getPosition().y < size)
+    {
+        robotsGrid.at(robot.getPosition().y).at(robot.getPosition().x) = '\0';
+        robot.moveRobot(task);
+        robotsGrid.at(robot.getPosition().y).at(robot.getPosition().x) = robot.getName();
     }
 }
 
-void Warehouse::drawTasks(vector<Task>& tasks) {
+void Warehouse::drawTasks(const deque<Task> &tasks, vector<Task> &activeTasks) {
+    tasksGrid.clear();
+    tasksGrid.resize(size);
+    for (int i = 0; i < size; i++) {
+        tasksGrid.at(i).resize(size);
+    }
+
     for (auto& task : tasks) {
-        warehouse.at(task.getPickupPosition().x).at(task.getPickupPosition().y) = task.getName();
-        warehouse.at(task.getDropoffPosition().x).at(task.getDropoffPosition().y) = task.getName();
+        // Check bounds
+        if (task.getPickupPosition().x >= 0 && task.getPickupPosition().y >= 0 &&
+            task.getDropoffPosition().x >= 0 && task.getDropoffPosition().y >= 0 &&
+            task.getPickupPosition().x < size && task.getPickupPosition().y < size &&
+            task.getDropoffPosition().x < size && task.getDropoffPosition().y < size)
+        {
+            tasksGrid.at(task.getPickupPosition().y).at(task.getPickupPosition().x) = task.getPickupName();
+            tasksGrid.at(task.getDropoffPosition().y).at(task.getDropoffPosition().x) = task.getDropoffName();
+        }
+    }
+
+    for (auto& task : activeTasks) {
+        // Check bounds
+        if (task.getPickupPosition().x >= 0 && task.getPickupPosition().y >= 0 &&
+            task.getPickupPosition().x < size && task.getPickupPosition().y < size)
+        {
+            tasksGrid.at(task.getPickupPosition().y).at(task.getPickupPosition().x) = task.getPickupName();
+        }
+        // Check bounds
+        if (task.getDropoffPosition().x >= 0 && task.getDropoffPosition().y >= 0 &&
+            task.getDropoffPosition().x < size && task.getDropoffPosition().y < size)
+        {
+            tasksGrid.at(task.getDropoffPosition().y).at(task.getDropoffPosition().x) = task.getDropoffName();
+        }
+    }
+}
+
+void Warehouse::updateTask(const Robot& robot, Task &task) {
+    // tasksGrid.clear();
+    // tasksGrid.resize(size);
+    // for (int i = 0; i < size; i++) {
+    //     tasksGrid.at(i).resize(size);
+    // }
+
+    if (robot.getPosition() == task.getPickupPosition()) {
+        task.setPickupPosition({-1, -1});
+        // task.setPickupName(' ');
+    }
+    if (robot.getPosition() == task.getDropoffPosition() && task.getPickupPosition() == Point{-1, -1}) {
+        task.setDropoffPosition({-1, -1});
+        // task.setDropoffName(' ');
     }
 }
 
@@ -64,10 +117,20 @@ string Warehouse::getWarehouseStr() {
     stringstream ss;
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
-            ss << " " << warehouse[i][j] << " ";
+            if (robotsGrid[i][j] != '\0') {
+                ss << " " << robotsGrid[i][j] << " ";
+            }
+            else if (tasksGrid[i][j] != '\0') {
+                ss << " " << tasksGrid[i][j] << " ";
+            }
+            else {
+                ss << " " << warehouseGrid[i][j] << " ";
+            }
         }
+        // Numbers on the side
         ss << setw(2) << setfill('0') << i + 1 << endl;
     }
+    // Numbers at the bottom
     for (int i = 0; i < size; i++) {
         ss << " " << right << setfill('0') << setw(2) << i + 1;
     }
@@ -80,14 +143,14 @@ int Warehouse::getWarehouseSize() const {
 }
 
 const vector<vector<char>> *Warehouse::getWarehouse() const {
-    return &warehouse;
+    return &warehouseGrid;
 }
 
 Point Warehouse::findDfsStart() {
     // Run through the warehouse vector and find the first air space
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
-            if (warehouse.at(i).at(j) == air_symbol) {
+            if (warehouseGrid.at(j).at(i) == air_symbol) {
                 return {i, j};
             }
         }
@@ -95,7 +158,7 @@ Point Warehouse::findDfsStart() {
     return {-1, -1};
 }
 
-int Warehouse::dfs(Point currentCoord, map<Point, bool>& visited) {
+int Warehouse::dfs(const Point currentCoord, map<Point, bool>& visited) {
 
     int numSpacesFound = 1;
 
@@ -105,29 +168,29 @@ int Warehouse::dfs(Point currentCoord, map<Point, bool>& visited) {
     vector<Point> adjacent;
 
     // find all the spaces adjacent to the current coordinate
-    Point up = {currentCoord.x, currentCoord.y + 1};
-    Point down = {currentCoord.x, currentCoord.y - 1};
-    Point left = {currentCoord.x - 1, currentCoord.y};
-    Point right = {currentCoord.x + 1, currentCoord.y};
+    const Point up = {currentCoord.x, currentCoord.y + 1};
+    const Point down = {currentCoord.x, currentCoord.y - 1};
+    const Point left = {currentCoord.x - 1, currentCoord.y};
+    const Point right = {currentCoord.x + 1, currentCoord.y};
 
     // if the neighboring spaces are valid and are filled with air, push it to the adjacent vector
     if (up.x >= 0 && up.y >= 0 && up.x < size && up.y < size) {
-        if (warehouse.at(up.x).at(up.y) == air_symbol) {
+        if (warehouseGrid.at(up.y).at(up.x) == air_symbol) {
             adjacent.push_back(up);
         }
     }
     if (down.x >= 0 && down.y >= 0 && down.x < size && down.y < size) {
-        if (warehouse.at(down.x).at(down.y) == air_symbol) {
+        if (warehouseGrid.at(down.y).at(down.x) == air_symbol) {
             adjacent.push_back(down);
         }
     }
     if (left.x >= 0 && left.y >= 0 && left.x < size && left.y < size) {
-        if (warehouse.at(left.x).at(left.y) == air_symbol) {
+        if (warehouseGrid.at(left.y).at(left.x) == air_symbol) {
             adjacent.push_back(left);
         }
     }
     if (right.x >= 0 && right.y >= 0 && right.x < size && right.y < size) {
-        if (warehouse.at(right.x).at(right.y) == air_symbol) {
+        if (warehouseGrid.at(right.y).at(right.x) == air_symbol) {
             adjacent.push_back(right);
         }
     }
@@ -141,20 +204,10 @@ int Warehouse::dfs(Point currentCoord, map<Point, bool>& visited) {
     return numSpacesFound;
 }
 
-bool Warehouse::isAir(Point coord) const {
-    if (coord.x < size && coord.y < size) {
-        return (warehouse.at(coord.x).at(coord.y) == air_symbol);
+bool Warehouse::isAir(const Point coord) const {
+    if (coord.x >= 0 && coord.y >= 0 && coord.x < size && coord.y < size) {
+        return warehouseGrid.at(coord.y).at(coord.x) == air_symbol && robotsGrid.at(coord.y).at(coord.x) == '\0' && tasksGrid.at(coord.y).at(coord.x) == '\0';
     }
-    else {
-        cout << "Error: Invalid coordinate (1-" + to_string(size) + ")" << endl;
-        return false;
-    }
-}
-
-int Warehouse::getWarehouseSeed() const {
-    return warehouseSeed;
-}
-
-void Warehouse::setWarehouseSeed(int warehouseSeed) {
-    this->warehouseSeed = warehouseSeed;
+    cout << "Error: Invalid coordinate (1-" + to_string(size) + ")" << endl;
+    return false;
 }

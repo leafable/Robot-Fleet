@@ -6,6 +6,7 @@
 #include "Warehouse.h"
 #include "Point.h"
 
+class TaskManager;
 class Task;
 class Warehouse;
 using namespace std;
@@ -29,10 +30,11 @@ public:
     Point peekPath();
     bool isPathEmpty() const;
     int calcH(Point a, Point b);
-    vector<Point> searchPath(Warehouse &w, Task &t);
-    vector<Point> searchPath(const Warehouse &w, const Point &pickup, const Point &dropoff);
-    void moveRobot();
+    void searchPath(const Warehouse &w, const Point &pickup, const Point &dropoff);
+    void moveRobot(Task &task);
     Point nextMove();
+    void printPath();
+    bool isCarrying() const;
 
 private:
     stack<Point> path;
@@ -40,6 +42,7 @@ private:
     int battery;
     Point position;
     string status;
+    bool carry;
 
     struct Node {
         Point point;

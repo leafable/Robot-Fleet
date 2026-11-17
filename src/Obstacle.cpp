@@ -1,7 +1,3 @@
-//
-// Created by leafy on 10/20/2026.
-//
-
 #include "Obstacle.h"
 #include "Warehouse.h"
 
@@ -26,7 +22,7 @@ vector<Point> Obstacle::getCoords() const {
     vector<Point> coords;
     for (int i = 0; i < size.x; i++) {
         for (int j = 0; j < size.y; j++) {
-            coords.push_back({origin.x + i, origin.y + j});
+            coords.emplace_back(origin.x + i, origin.y + j);
         }
     }
     return coords;

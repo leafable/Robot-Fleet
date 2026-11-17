@@ -1,7 +1,3 @@
-//
-// Created by leafy on 11/11/2026.
-//
-
 #ifndef POINT_H
 #define POINT_H
 

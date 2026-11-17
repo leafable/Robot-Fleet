@@ -1,11 +1,14 @@
-//
-// Created by leafy on 10/20/2026.
-//
-
 #include "TaskManager.h"
+#include <memory>
+
+TaskManager::TaskManager(char startName, const Warehouse& warehouse, mt19937& seed, const int numTasks) {
+    for (int i = 0; i < numTasks; i++) {
+        addTask(Task(startName + 2 * i, warehouse, seed));
+    }
+}
 
 void TaskManager::addTask(const Task& task) {
-    taskStack.push_back(task);
+    taskQueue.push_back(task);
 }
 
 double TaskManager::getDistance(const Robot& robot, const Task& task, const bool pickup_dropoff) const {
@@ -26,18 +29,25 @@ double TaskManager::getDistance(const Robot& robot, const Task& task, const bool
 }
 
 Task TaskManager::popTask() {
-    if (!taskStack.empty()) {
-        Task task = taskStack.front();
-        taskStack.erase(taskStack.begin());
+    if (!taskQueue.empty()) {
+        Task task = taskQueue.front();
+        taskQueue.pop_front();
         return task;
     }
-    return {' ', {-1, -1}, {-1, -1}};
+    return {};
+}
+
+Task TaskManager::peekTask() const {
+    if (!taskQueue.empty()) {
+        return taskQueue.front();
+    }
+    return {};
 }
 
 int TaskManager::getSize() const {
-    return taskStack.size();
+    return taskQueue.size();
 }
 
-vector<Task>& TaskManager::getTasks() {
-    return taskStack;
+deque<Task> &TaskManager::getTasks() {
+    return taskQueue;
 }
