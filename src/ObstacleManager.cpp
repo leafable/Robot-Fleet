@@ -1,21 +1,12 @@
-//
-// Created by leafy on 10/20/2026.
-//
-
 #include "ObstacleManager.h"
-
 #include "Warehouse.h"
-
-int ObstacleManager::warehouseSeed = random_device{}();
+#include <iostream>
+#include <map>
 
 // If no seed is provided, pass the randomly generated seed
-ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse) : ObstacleManager(targetNumObstacles, warehouse, warehouseSeed) {}
+// ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse) : ObstacleManager(targetNumObstacles, warehouse, warehouse.getWarehouseSeed()) {}
 
-ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse, int setSeed) : numSpacesTaken(0) {
-
-    warehouseSeed = setSeed;
-    mt19937 seed(setSeed);
-
+ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse, mt19937& seed) : numSpacesTaken(0) {
     // If the passed value is less than 1, no obstacles are created
     if (targetNumObstacles < 1) {
         return;
@@ -37,20 +28,20 @@ ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& wareho
         }
 
         // Temporarily update the warehouse
-        warehouse.updateWarehouse(candidate, true);
+        warehouse.drawObstacles(candidate, true);
 
         // If the total number of air spaces is greater than the number of air spaces found
         // by the dfs algorithm, then the candidate obstacle is separating the warehouse
         // into islands that the robot cannot cross. Discard the candidate obstacle.
         const auto start = warehouse.findDfsStart();
-        numSpacesTaken += candidate.getSize().first * candidate.getSize().second;
+        numSpacesTaken += candidate.getSize().x * candidate.getSize().y;
         const int numAirSpaces = warehouse.getWarehouseSize() * warehouse.getWarehouseSize() - numSpacesTaken;
-        map<pair<int, int>, bool> visited;
+        map<Point, bool> visited;
 
-        if (start.first == -1 && start.second == -1 || warehouse.dfs(start, visited) < numAirSpaces) {
+        if (start.x == -1 && start.y == -1 || warehouse.dfs(start, visited) < numAirSpaces) {
             attempts++;
-            numSpacesTaken -= candidate.getSize().first * candidate.getSize().second;
-            warehouse.updateWarehouse(candidate, false);
+            numSpacesTaken -= candidate.getSize().x * candidate.getSize().y;
+            warehouse.drawObstacles(candidate, false);
             continue;
         }
 
@@ -69,24 +60,24 @@ bool ObstacleManager::hasOverlap(const Obstacle& obstacle2) const {
         if (obstacle1.getRightBoundary() >= obstacle2.getLeftBoundary() && obstacle1.getLeftBoundary() <= obstacle2.getRightBoundary()) {
             // Check if the obstacles overlap on the y axis
             if (obstacle1.getUpperBoundary() >= obstacle2.getLowerBoundary() && obstacle1.getLowerBoundary() <= obstacle2.getUpperBoundary()) {
-                return 1;
+                return true;
             }
         }
     }
-    return 0;
+    return false;
 }
 
-bool ObstacleManager::hasOverlap(const pair<int,int>& coord) const {
+bool ObstacleManager::hasOverlap(const Point& coord) const {
     for (const auto& obstacle : obstacles) {
         // Check if the point overlaps the obstacle on the x axis
-        if (obstacle.getRightBoundary() >= coord.first && obstacle.getLeftBoundary() <= coord.first) {
+        if (obstacle.getRightBoundary() >= coord.x && obstacle.getLeftBoundary() <= coord.x) {
             // Check if the point overlaps the obstacle on the y axis
-            if (obstacle.getUpperBoundary() >= coord.second && obstacle.getLowerBoundary() <= coord.second) {
-                return 1;
+            if (obstacle.getUpperBoundary() >= coord.y && obstacle.getLowerBoundary() <= coord.y) {
+                return true;
             }
         }
     }
-    return 0;
+    return false;
 }
 
 const vector<Obstacle>* ObstacleManager::getObstacles() const {
@@ -95,10 +86,6 @@ const vector<Obstacle>* ObstacleManager::getObstacles() const {
 
 int ObstacleManager::getNumSpacesTaken() const {
     return numSpacesTaken;
-}
-
-int ObstacleManager::getSeed() const {
-    return warehouseSeed;
 }
 
 int ObstacleManager::getNumObstacles() const {

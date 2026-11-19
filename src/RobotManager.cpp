@@ -1,43 +1,64 @@
-#include "../include/RobotManager.h"
-#include "../include/Robot.h"
+#include "RobotManager.h"
+#include "Robot.h"
+#include "Warehouse.h"
 
-RobotManager::RobotManager() {
-    Robot r = Robot('A', 100, {0, 0}, "idle");
-    robots.push_back(r);
-    numRobots = 1;
-}
+// RobotManager::RobotManager(const Warehouse& warehouse, mt19937& seed) {
+//     Point coords;
+//     do {
+//         uniform_int_distribution<int> coordX(0, warehouse.getWarehouseSize() - 1);
+//         uniform_int_distribution<int> coordY(0, warehouse.getWarehouseSize() - 1);
+//         coords = {coordX(seed), coordY(seed)};
+//     } while (!warehouse.isAir(coords));
+//     Robot r = Robot('1', 100, coords, "Idle");
+//     robots.push_back(r);
+//     numRobots = 1;
+// }
 
-RobotManager::RobotManager(int n) {
-    for (int i = 0; i < n; i++) {
-        char c = 65 + i;
-        Robot r = Robot(c, 100, {0, i}, "idle");
-        robots.push_back(r);
-    }
+RobotManager::RobotManager(const Warehouse& warehouse, mt19937& seed, const int n) {
+    addRobot(warehouse, seed, n);
     numRobots = n;
 }
 
-void RobotManager::addRobot(Robot& r) {
-    robots.push_back(r);
-    numRobots++;
-}
-
-
-void RobotManager::moveRobot() {
-    for(int i = 0; i < robots.size(); i++) {
-        robots[i].setPositon(robots[i].peekPath());
-        robots[i].popPath();
-        robots[i].setStatus("active");
-        robots[i].setBattery((robots[i].getBattery()-2));
-        if (robots[i].isPathEmpty()) {
-            robots[i].setStatus("idle");
-        }
+void RobotManager::addRobot(const Warehouse& warehouse, mt19937& seed, const int n) {
+    for (int i = 0; i < n; i++) {
+        Point coords;
+        do {
+            uniform_int_distribution<int> coordX(0, warehouse.getWarehouseSize() - 1);
+            uniform_int_distribution<int> coordY(0, warehouse.getWarehouseSize() - 1);
+            coords = {coordX(seed), coordY(seed)};
+        } while (!warehouse.isAir(coords));
+        robots.emplace_back(robots.empty() ? '1' : robots.back().getName() + 1, 100, coords, "Idle");
     }
+    numRobots = robots.size();
 }
 
-std::pair<int, int> RobotManager::nextMove(Robot& r) {
-    return r.peekPath();
+void RobotManager::removeRobot(const int n) {
+    for (int i = 0; i < n && robots.size() > 1; i++) {
+        robots.pop_back();
+    }
+    numRobots = robots.size();
 }
 
-const std::vector<Robot>& RobotManager::getRobots() const {
+// void RobotManager::moveRobot(const int steps) {
+//     for (int i = 0; i < steps; i++) {
+//         robots[index].setPosition(robots[index].peekPath());
+//         robots[index].popPath();
+//         robots[index].setStatus("active");
+//         robots[index].setBattery((robots[index].getBattery()-2));
+//         if (robots[index].isPathEmpty()) {
+//             robots[index].setStatus("Idle");
+//         }
+//     }
+// }
+
+// std::pair<int, int> RobotManager::nextMove(Robot& r) {
+//     return r.peekPath();
+// }
+
+std::vector<Robot>& RobotManager::getRobots() {
     return robots;
+}
+
+int RobotManager::getNumRobots() const {
+    return numRobots;
 }

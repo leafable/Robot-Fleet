@@ -1,28 +1,31 @@
-//
-// Created by leafy on 10/20/2026.
-//
-
 #ifndef ROBOT_FLEET_SYSTEM_H
 #define ROBOT_FLEET_SYSTEM_H
 #include <iostream>
 #include "Warehouse.h"
-#include "TempWarehouse.h"
 #include "ObstacleManager.h"
+#include "TaskManager.h"
 
 class System {
 private:
+    mt19937 seed;
+    static int randomSeed;
+    static int numRobots;
+    static int numTasks;
     Warehouse warehouse;
-    TempWarehouse tempWarehouse;
     ObstacleManager obstacles;
+    RobotManager robots;
+    TaskManager tasks;
 
-    int getSelection(int min, int max, bool bounded);
-    int getSelection(int min, int max, bool bounded, const string& text, const string& error);
+    vector<Task> activeTasks;
+    vector<int> noTasksCounter;
+
+    int getSelection(int min, int max);
+    int getSelection(int min, int max, const string& text, const string& error);
 
 public:
     System();
     ~System();
     void printWarehouse();
-    void printTempWarehouse();
     void runProcess();
 };
 

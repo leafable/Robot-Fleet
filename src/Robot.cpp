@@ -1,24 +1,21 @@
-#include <string>
+#include "Robot.h"
+#include "Task.h"
 #include <utility>
-
+#include <algorithm>
+#include <queue>
 #include <iostream>
 
-#include "../include/Robot.h"
-#include "../include/Task.h"
-#include "../include/Warehouse.h"
-
-
-Robot::Robot(const char c, const int b, const std::pair<int, int> p, std::string s)
-    : name(c), battery(b), position(p), status(std::move(s))
+Robot::Robot(const int n, const int b, const Point &p, string  s)
+    : name(n), battery(b), position(p), status(std::move(s)), carry(false)
 {
 }
 
-char Robot::getName() const {
+int Robot::getName() const {
     return name;
 }
 
-void Robot::setName(char n) {
-    name = std::move(n);
+void Robot::setName(const int n) {
+    name = n;
 }
 
 int Robot::getBattery() const {
@@ -29,45 +26,51 @@ void Robot::setBattery(const int b) {
     battery = b;
 }
 
-pair<int, int> Robot::getPositon() {
+Point Robot::getPosition() const {
     return position;
 }
 
-void Robot::setPositon(pair <int, int> p) {
-    position = p;
+void Robot::setPosition(const Point &p) {
+    if (p.x >= 0 && p.y >= 0)
+        position = p;
 }
 
-string Robot::getStatus() {
+string Robot::getStatus() const {
     return status;
 }
 
-void Robot::setStatus(string s) {
+void Robot::setStatus(const string &s) {
     status = s;
 }
 
-stack<pair <int, int>> Robot::getPath() {
-    return path;
+stack<Point> Robot::getPath() {
+    if (!path.empty()) {
+        return path;
+    }
+    return stack<Point>({{-1, -1}});
 }
 
 void Robot::pushPath(vector <Point> p) {
     for (int i = 0; i < p.size(); i++) {
-        pair <int, int> pt = {p[i].x, p[i].y};
+        Point pt = {p[i].x, p[i].y};
         path.push(pt);
     }
-
-
 }
-
 
 void Robot::popPath() {
-    path.pop();
+    if (!path.empty()) {
+        path.pop();
+    }
 }
 
-pair<int,int> Robot::peekPath() {
-    return path.top();
+Point Robot::peekPath() {
+    if (!path.empty()) {
+        return path.top();
+    }
+    return {-1, -1};
 }
 
-bool Robot::isPathEmpty() {
+bool Robot::isPathEmpty() const {
     return path.empty();
 }
 
@@ -75,45 +78,50 @@ int Robot::calcH (const Point a, const Point b) {
     return abs(a.x - b.x) + abs(a.y - b.y);
 }
 
-vector<Point> Robot::searchPath(Warehouse& w, Task& t) {
-    const vector<vector<char>> grid = {
-    {'.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.', '.'}, // 01
-    {'.', '.', '.', 'o', 'o', 'o', 'o', 'o', '.', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.', '.'}, // 02
-    {'.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'}, // 03
-    {'.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o', 'o', '.', 'o', '.', 'o'}, // 04
-    {'o', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o', 'o', '.', 'o', '.', 'o'}, // 05
-    {'o', 'o', 'o', 'o', 'o', '.', 'o', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', '.', 'o', 'o'}, // 06
-    {'o', 'o', 'o', 'o', 'o', '.', 'o', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', '.', 'o', 'o'}, // 07
-    {'.', '.', '.', '.', 'o', '.', 'o', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', '.', 'o', 'o'}, // 08
-    {'.', '.', 'o', '.', 'o', '.', 'o', '.', '.', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.'}, // 09
-    {'.', '.', 'o', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.'}, // 10
-    {'.', '.', 'o', '.', 'o', 'o', '.', '.', '.', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', '.', '.', '.'}, // 11
-    {'.', '.', 'o', '.', 'o', 'o', '.', 'o', '.', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.'}, // 12
-    {'.', '.', '.', '.', 'o', 'o', '.', 'o', '.', '.', '.', 'o', 'o', '.', '.', '.', '.', '.', '.', '.'}, // 13
-    {'.', '.', '.', '.', 'o', 'o', '.', 'o', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'}, // 14
-    {'.', '.', '.', '.', 'o', 'o', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o', '.', '.', '.', '.'}, // 15
-    {'.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.'}, // 16
-    {'o', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o', '.', 'o', '.', '.', '.', '.'}, // 17
-    {'o', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', '.', 'o', 'o', 'o'}, // 18
-    {'o', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o'}, // 19
-    {'o', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.'}  // 20
-    };
+// vector<Point> Robot::searchPath(Warehouse& w, Task& t) {
+//     return searchPath(w, t.getPickupPosition(), t.getDropoffPosition());
+// }
 
+void Robot::searchPath(const Warehouse& w, const Point &pickup, const Point &dropoff) {
+    // const vector<vector<char>> grid = {
+    // {'.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.', '.'}, // 01
+    // {'.', '.', '.', 'o', 'o', 'o', 'o', 'o', '.', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.', '.'}, // 02
+    // {'.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'}, // 03
+    // {'.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o', 'o', '.', 'o', '.', 'o'}, // 04
+    // {'o', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o', 'o', '.', 'o', '.', 'o'}, // 05
+    // {'o', 'o', 'o', 'o', 'o', '.', 'o', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', '.', 'o', 'o'}, // 06
+    // {'o', 'o', 'o', 'o', 'o', '.', 'o', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', '.', 'o', 'o'}, // 07
+    // {'.', '.', '.', '.', 'o', '.', 'o', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', '.', 'o', 'o'}, // 08
+    // {'.', '.', 'o', '.', 'o', '.', 'o', '.', '.', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.'}, // 09
+    // {'.', '.', 'o', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.'}, // 10
+    // {'.', '.', 'o', '.', 'o', 'o', '.', '.', '.', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', '.', '.', '.'}, // 11
+    // {'.', '.', 'o', '.', 'o', 'o', '.', 'o', '.', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.'}, // 12
+    // {'.', '.', '.', '.', 'o', 'o', '.', 'o', '.', '.', '.', 'o', 'o', '.', '.', '.', '.', '.', '.', '.'}, // 13
+    // {'.', '.', '.', '.', 'o', 'o', '.', 'o', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'}, // 14
+    // {'.', '.', '.', '.', 'o', 'o', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o', '.', '.', '.', '.'}, // 15
+    // {'.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.'}, // 16
+    // {'o', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o', '.', 'o', '.', '.', '.', '.'}, // 17
+    // {'o', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', '.', 'o', 'o', 'o'}, // 18
+    // {'o', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o'}, // 19
+    // {'o', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.', '.', 'o', 'o', 'o', 'o', '.', '.', '.', '.', '.'}  // 20
+    // };
+
+    const vector<vector<char>> grid = *w.getWarehouse();
 
     //Grid is AxA, so same cols and rows
-    int rows = 20;
-    int cols = 20;
+    int rows = w.getWarehouseSize();
+    int cols = w.getWarehouseSize();
 
-    Point start = {t.getPickupPosition().first, t.getPickupPosition().second};
-    Point goal = {t.getDropOffPosition().first, t.getDropOffPosition().second};
+    Point start = {pickup.x, pickup.y};
+    Point goal = {dropoff.x, dropoff.y};
 
-    int xint = t.getPickupPosition().first;
-    int yint = t.getPickupPosition().second;
-    int xend = t.getDropOffPosition().first;
-    int yend = t.getDropOffPosition().second;
+    int xint = pickup.x;
+    int yint = pickup.y;
+    int xend = dropoff.x;
+    int yend = dropoff.y;
 
     //Check that the initial positions are open
-    if ((grid[yint][xint] != '.') && (grid[yend][xend] != '.')) {
+    if ((grid[yint][xint] == '#') || (grid[yend][xend] == '#')) {
         cerr << "Path impossible!" << endl;
     }
 
@@ -128,7 +136,7 @@ vector<Point> Robot::searchPath(Warehouse& w, Task& t) {
     vector<vector<int>> gScore(rows, vector<int>(cols, INT_MAX));
 
     //Open set: Create a priority queue based on the calculated weight
-    std::priority_queue<Node, vector<Node>, greater<Node>> open;
+    priority_queue<Node, vector<Node>, greater<Node>> open;
 
     gScore[yint][xint] = 0;
     int hStart = calcH(start, goal);
@@ -158,8 +166,8 @@ vector<Point> Robot::searchPath(Warehouse& w, Task& t) {
         for (int i = 0; i < 4; i++) {
             Point neigh = {current.point.x + dx[i], current.point.y + dy[i]};
 
-            if (neigh.y >= 0 && neigh.y < rows && neigh.x >= 0 && neigh.x < cols) {
-                if (grid[neigh.y][neigh.x] == '.') {
+            if (neigh.x >= 0 && neigh.x < rows && neigh.y >= 0 && neigh.y < cols) {
+                if (grid[neigh.y][neigh.x] != '#') {
                     int tempG = current.g + 1;
 
                     if (tempG < gScore[neigh.y][neigh.x]) {
@@ -177,21 +185,64 @@ vector<Point> Robot::searchPath(Warehouse& w, Task& t) {
         }
     }
 
-    vector<Point> path;
+    // vector<Point> path;
 
     if (pathFound) {
         Point curr = goal;
 
         while (curr != start) {
-            path.push_back(curr);
+            path.push(curr);
             curr = parentPath[curr.y][curr.x];  //should x and y be flipped?
         }
 
-        path.push_back(start);
-        reverse(path.begin(), path.end());
+        // path.push(start);
+        // reverse(path.begin(), path.end());
 
     }
 
-    return path;
+    // return path;
+}
 
+void Robot::moveRobot(Task &task) {
+    //When the robot has no charge the status is set to charging
+    if (getBattery() == 0) {
+        setStatus("Charging");
+    }
+
+    //When the charging status is set, it will only change when the robot
+    //is at full charge (5 moves)
+    if (getStatus() == "Charging" && getBattery() < 100) {
+        setBattery(getBattery() + 20);
+        return;
+    }
+
+    //Once the robot is charged to 100, it will check and set the status for continuing moves
+    if (getStatus() == "Charging" && getBattery() == 100) {
+        setStatus(isPathEmpty() ? "Idle" : "Active");
+    }
+
+    if (isPathEmpty()) {
+        setStatus("Idle");
+        task = {};
+        carry = false;
+        return;
+    }
+
+    //This is where the robot is between 100 and 0, but not charging,
+    //they will simply process one move
+    setPosition(peekPath());
+    path.pop();
+    if (position == task.getPickupPosition()) {
+        carry = true;
+    }
+    setStatus(isPathEmpty() ? "Idle" : "Active");
+    if (isPathEmpty()) {
+        task = {};
+        carry = false;
+    }
+    setBattery(getBattery() - 5);
+}
+
+bool Robot::isCarrying() const {
+    return carry;
 }
