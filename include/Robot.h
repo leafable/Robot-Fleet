@@ -64,6 +64,26 @@ private:
         }
     };
 
+    struct Node {
+        Point point;
+        int f, g, h;
+        //Node* parent;
+
+        //Node(Point p, int g, int h, int f, Node* n) : point(p), g(g), h(h), f(f), parent(n) {}
+
+        Node(Point p, int g, int h, int f) : point(p), f(f), g(g), h(h) {}
+
+        //Custom operator to quickly compare f values
+        bool operator()(const Node* a, const Node* b) const {
+            return a->f > b->f;
+        }
+
+        // Overload < operator for max-heap (higher priority comes first)
+        bool operator>(const Node& other) const {
+            return this->f > other.f;
+        }
+    };
+
 };
 
 
