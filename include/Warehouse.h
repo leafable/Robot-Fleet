@@ -30,18 +30,14 @@ public:
     void drawObstacles(const Obstacle& obstacle, bool additive);
     void drawRobots(const vector<Robot> &robots);
     void updateRobot(Robot &robot, Task& task);
-    void drawTasks(const deque<Task> & tasks, vector<Task> &activeTasks);
-
+    void drawTasks(const deque<Task> & tasks, const vector<Task> &activeTasks);
     void updateTask(const Robot &robot, Task &task);
-
     string getWarehouseStr();
     int getWarehouseSize() const;
-
     const vector<vector<char>> *getWarehouse() const;
-
     Point findDfsStart();
     int dfs(Point currentCoord, map<Point, bool>& visited);
-    bool isAir(Point) const;
+    bool isAir(Point coord) const;
 };
 
 

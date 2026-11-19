@@ -8,10 +8,11 @@ class Warehouse;
 
 class RobotManager {
 public:
-    RobotManager(const Warehouse& warehouse, std::mt19937& seed);
+    // RobotManager(const Warehouse& warehouse, std::mt19937& seed);
     RobotManager(const Warehouse& warehouse, std::mt19937& seed, int n);
     ~RobotManager() = default;
-    void addRobot(const Robot &r);
+    void addRobot(const Warehouse& warehouse, std::mt19937& seed, int n);
+    void removeRobot(int n);
     // void moveRobot(int index, int steps);
     // Point nextMove(Robot &r);
     std::vector<Robot>& getRobots();

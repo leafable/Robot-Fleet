@@ -25,15 +25,8 @@ public:
     string getStatus() const;
     void setStatus(const string &s);
     stack<Point> getPath();
-    void pushPath(vector<Point> p);
-    void popPath();
-    Point peekPath();
-    bool isPathEmpty() const;
-    int calcH(Point a, Point b);
     void searchPath(const Warehouse &w, const Point &pickup, const Point &dropoff);
     void moveRobot(Task &task);
-    Point nextMove();
-    void printPath();
     bool isCarrying() const;
 
 private:
@@ -43,6 +36,13 @@ private:
     Point position;
     string status;
     bool carry;
+
+    int calcH(Point a, Point b);
+    void pushPath(vector<Point> p);
+    void popPath();
+    Point peekPath();
+    bool isPathEmpty() const;
+
 
     struct Node {
         Point point;

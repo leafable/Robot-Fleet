@@ -11,35 +11,28 @@ void TaskManager::addTask(const Task& task) {
     taskQueue.push_back(task);
 }
 
-double TaskManager::getDistance(const Robot& robot, const Task& task, const bool pickup_dropoff) const {
-
-    double x{};
-    double y{};
-
-    if (!pickup_dropoff) {
-        x = robot.getPosition().x - task.getPickupPosition().x;
-        y = robot.getPosition().y - task.getPickupPosition().y;
-    }
-    else {
-        x = robot.getPosition().x - task.getDropoffPosition().x;
-        y = robot.getPosition().y - task.getDropoffPosition().y;
-    }
-
-    return sqrt(x * x + y * y);
-}
+// double TaskManager::getDistance(const Robot& robot, const Task& task, const bool pickup_dropoff) const {
+//
+//     double x{};
+//     double y{};
+//
+//     if (!pickup_dropoff) {
+//         x = robot.getPosition().x - task.getPickupPosition().x;
+//         y = robot.getPosition().y - task.getPickupPosition().y;
+//     }
+//     else {
+//         x = robot.getPosition().x - task.getDropoffPosition().x;
+//         y = robot.getPosition().y - task.getDropoffPosition().y;
+//     }
+//
+//     return sqrt(x * x + y * y);
+// }
 
 Task TaskManager::popTask() {
     if (!taskQueue.empty()) {
         Task task = taskQueue.front();
         taskQueue.pop_front();
         return task;
-    }
-    return {};
-}
-
-Task TaskManager::peekTask() const {
-    if (!taskQueue.empty()) {
-        return taskQueue.front();
     }
     return {};
 }

@@ -34,6 +34,12 @@ void Warehouse::drawObstacles(const Obstacle& obstacle, const bool additive) {
 }
 
 void Warehouse::drawRobots(const vector<Robot>& robots) {
+    robotsGrid.clear();
+    robotsGrid.resize(size);
+    for (int i = 0; i < size; i++) {
+        robotsGrid.at(i).resize(size);
+    }
+
     for (auto& robot : robots) {
         // Check bounds
         if (robot.getPosition().x >= 0 && robot.getPosition().y >= 0 &&
@@ -61,7 +67,7 @@ void Warehouse::updateRobot(Robot &robot, Task& task) {
     }
 }
 
-void Warehouse::drawTasks(const deque<Task> &tasks, vector<Task> &activeTasks) {
+void Warehouse::drawTasks(const deque<Task> &tasks, const vector<Task> &activeTasks) {
     tasksGrid.clear();
     tasksGrid.resize(size);
     for (int i = 0; i < size; i++) {

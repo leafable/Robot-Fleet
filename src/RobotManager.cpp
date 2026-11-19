@@ -2,38 +2,42 @@
 #include "Robot.h"
 #include "Warehouse.h"
 
-RobotManager::RobotManager(const Warehouse& warehouse, mt19937& seed) {
-    Point coords;
-    do {
-        uniform_int_distribution<int> coordX(0, warehouse.getWarehouseSize() - 1);
-        uniform_int_distribution<int> coordY(0, warehouse.getWarehouseSize() - 1);
-        coords = {coordX(seed), coordY(seed)};
-    } while (!warehouse.isAir(coords));
-    Robot r = Robot('1', 100, coords, "Idle");
-    robots.push_back(r);
-    numRobots = 1;
-}
+// RobotManager::RobotManager(const Warehouse& warehouse, mt19937& seed) {
+//     Point coords;
+//     do {
+//         uniform_int_distribution<int> coordX(0, warehouse.getWarehouseSize() - 1);
+//         uniform_int_distribution<int> coordY(0, warehouse.getWarehouseSize() - 1);
+//         coords = {coordX(seed), coordY(seed)};
+//     } while (!warehouse.isAir(coords));
+//     Robot r = Robot('1', 100, coords, "Idle");
+//     robots.push_back(r);
+//     numRobots = 1;
+// }
 
 RobotManager::RobotManager(const Warehouse& warehouse, mt19937& seed, const int n) {
-    Point coords;
+    addRobot(warehouse, seed, n);
+    numRobots = n;
+}
+
+void RobotManager::addRobot(const Warehouse& warehouse, mt19937& seed, const int n) {
     for (int i = 0; i < n; i++) {
+        Point coords;
         do {
             uniform_int_distribution<int> coordX(0, warehouse.getWarehouseSize() - 1);
             uniform_int_distribution<int> coordY(0, warehouse.getWarehouseSize() - 1);
             coords = {coordX(seed), coordY(seed)};
         } while (!warehouse.isAir(coords));
-        int name = '1';
-        Robot r = Robot(name + i, 100, coords, "Idle");
-        robots.push_back(r);
+        robots.emplace_back(robots.empty() ? '1' : robots.back().getName() + 1, 100, coords, "Idle");
     }
-    numRobots = n;
+    numRobots = robots.size();
 }
 
-void RobotManager::addRobot(const Robot& r) {
-    robots.push_back(r);
-    numRobots++;
+void RobotManager::removeRobot(const int n) {
+    for (int i = 0; i < n && robots.size() > 1; i++) {
+        robots.pop_back();
+    }
+    numRobots = robots.size();
 }
-
 
 // void RobotManager::moveRobot(const int steps) {
 //     for (int i = 0; i < steps; i++) {

@@ -15,10 +15,12 @@ private:
     ObstacleManager obstacles;
     RobotManager robots;
     TaskManager tasks;
-    vector<Task> activeTasks;
 
-    int getSelection(int min, int max, bool bounded);
-    int getSelection(int min, int max, bool bounded, const string& text, const string& error);
+    vector<Task> activeTasks;
+    vector<int> noTasksCounter;
+
+    int getSelection(int min, int max);
+    int getSelection(int min, int max, const string& text, const string& error);
 
 public:
     System();

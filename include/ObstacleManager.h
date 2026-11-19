@@ -9,13 +9,13 @@ class ObstacleManager {
 private:
     vector<Obstacle> obstacles;
     int numSpacesTaken;
+    bool hasOverlap(const Obstacle& obstacle2) const;
+    bool hasOverlap(const Point& coord) const;
+    int getNumSpacesTaken() const;
 public:
     // ObstacleManager(int targetNumObstacles, Warehouse& warehouse);
     ObstacleManager(int targetNumObstacles, Warehouse& warehouse, mt19937& seed);
-    bool hasOverlap(const Obstacle& obstacle2) const;
-    bool hasOverlap(const Point& coord) const;
     const vector<Obstacle>* getObstacles() const;
-    int getNumSpacesTaken() const;
     int getNumObstacles() const;
 };
 

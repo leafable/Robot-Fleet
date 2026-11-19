@@ -63,10 +63,10 @@ void Task::setDropoffPosition(const Point& coord) {
     this->dropoff = coord;
 }
 
-void Task::setPickupName(const char name) {
-    this->pickupName = name;
-}
-
-void Task::setDropoffName(const char name) {
-    this->dropoffName = name;
-}
+// void Task::setPickupName(const char name) {
+//     this->pickupName = name;
+// }
+//
+// void Task::setDropoffName(const char name) {
+//     this->dropoffName = name;
+// }

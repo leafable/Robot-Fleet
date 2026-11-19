@@ -17,12 +17,12 @@ public:
     Task();
     Task(char startName, const Warehouse& warehouse, mt19937& seed);
     Task(char startName, const Point &pickup, const Point &dropoff);
-    void setPickupName(char name);
-    void setDropoffName(char name);
-    void setPickupPosition(const Point& coord);
-    void setDropoffPosition(const Point& coord);
+    // void setPickupName(char name);
+    // void setDropoffName(char name);
     char getPickupName() const;
     char getDropoffName() const;
+    void setPickupPosition(const Point& coord);
+    void setDropoffPosition(const Point& coord);
     Point getPickupPosition() const;
     Point getDropoffPosition() const;
 };

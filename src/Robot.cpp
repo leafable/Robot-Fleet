@@ -243,17 +243,6 @@ void Robot::moveRobot(Task &task) {
     setBattery(getBattery() - 5);
 }
 
-Point Robot::nextMove() {
-    return peekPath();
-}
-
-void Robot::printPath() {
-    for (int i = 0; i < path.size(); i++) {
-        cout << "(" << path.top().x + 1 << ", " << path.top().y + 1 << ")" << endl;
-        path.pop();
-    }
-}
-
 bool Robot::isCarrying() const {
     return carry;
 }
