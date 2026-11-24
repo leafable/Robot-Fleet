@@ -264,7 +264,7 @@ void System::runProcess() {
         else if (selection_config == 4) {
             // Change warehouse size
             cout << "Current warehouse size: " << warehouse.getWarehouseSize() << endl;
-            int temp_warehouseSize = getSelection(5, 50, "Warehouse size: ", "Error: Invalid warehouse size (5+)");
+            int temp_warehouseSize = getSelection(5, 35, "Warehouse size: ", "Error: Invalid warehouse size (5+)");
             seed.seed(randomSeed);
             warehouse = Warehouse(temp_warehouseSize);
             obstacles = ObstacleManager(obstacles.getNumObstacles(), warehouse, seed);
