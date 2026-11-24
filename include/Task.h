@@ -1,30 +1,31 @@
 #ifndef ROBOT_FLEET_TASK_H
 #define ROBOT_FLEET_TASK_H
-#include "Warehouse.h"
 #include "Point.h"
-
-class TaskManager;
 
 using namespace std;
 
 class Task {
 private:
     char pickupName;
-    char dropoffName;
-    Point pickup;
-    Point dropoff;
+    char dropOffName;
+    Point pickupPosition;
+    Point dropOffPosition;
+    bool assigned;
+    bool pickupStatus;
+    bool dropOffStatus;
 public:
     Task();
-    Task(char startName, const Warehouse& warehouse, mt19937& seed);
-    Task(char startName, const Point &pickup, const Point &dropoff);
-    // void setPickupName(char name);
-    // void setDropoffName(char name);
+    Task(char name, const Point &pickup, const Point &dropOff);
     char getPickupName() const;
-    char getDropoffName() const;
-    void setPickupPosition(const Point& coord);
-    void setDropoffPosition(const Point& coord);
+    char getDropOffName() const;
     Point getPickupPosition() const;
-    Point getDropoffPosition() const;
+    Point getDropOffPosition() const;
+    bool isAssigned() const;
+    void setAssigned(bool assigned);
+    bool getPickupStatus() const;
+    bool getDropOffStatus() const;
+    void setPickupStatus(bool pickupStatus);
+    void setDropOffStatus(bool dropOffStatus);
 };
 
 

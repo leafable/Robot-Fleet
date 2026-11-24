@@ -1,7 +1,9 @@
 #ifndef ROBOT_FLEET_OBSTACLEMANAGER_H
 #define ROBOT_FLEET_OBSTACLEMANAGER_H
-#include "Obstacle.h"
 #include "Point.h"
+#include "Obstacle.h"
+
+using namespace std;
 
 class Warehouse;
 
@@ -13,7 +15,6 @@ private:
     bool hasOverlap(const Point& coord) const;
     int getNumSpacesTaken() const;
 public:
-    // ObstacleManager(int targetNumObstacles, Warehouse& warehouse);
     ObstacleManager(int targetNumObstacles, Warehouse& warehouse, mt19937& seed);
     const vector<Obstacle>* getObstacles() const;
     int getNumObstacles() const;

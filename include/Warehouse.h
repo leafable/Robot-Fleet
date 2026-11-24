@@ -1,43 +1,31 @@
 #ifndef ROBOT_FLEET_WAREHOUSE_H
 #define ROBOT_FLEET_WAREHOUSE_H
-
 #include <deque>
 #include <string>
 #include <sstream>
 #include <vector>
 #include <iomanip>
-#include <map>
-#include <memory>
-
-#include "ObstacleManager.h"
-#include "RobotManager.h"
 #include "Point.h"
-
-class Obstacle;
-class Robot;
-class Task;
+#include "Obstacle.h"
+#include "Robot.h"
 
 using namespace std;
 
 class Warehouse {
 private:
     vector<vector<char>> warehouseGrid; // https://www.geeksforgeeks.org/cpp/different-ways-to-initialize-a-map-in-cpp/
-    vector<vector<char>> robotsGrid;
-    vector<vector<char>> tasksGrid;
     int size;
 public:
     Warehouse(int size);
+    ~Warehouse() = default;
     void drawObstacles(const Obstacle& obstacle, bool additive);
-    void drawRobots(const vector<Robot> &robots);
-    void updateRobot(Robot &robot, Task& task);
-    void drawTasks(const deque<Task> & tasks, const vector<Task> &activeTasks);
-    void updateTask(const Robot &robot, Task &task);
-    string getWarehouseStr();
+    string getWarehouseStr(const vector<Robot>& robots, const deque<Task>& tasks, const vector<Task>& activeTasks) const;
+    bool isValidPoint(const Point &point) const;
+    Point findDfsStart() const;
+    int dfs(Point currentCoord, vector<vector<bool>>& visited);
+    bool containsObstacle(const Point &coord) const;
     int getWarehouseSize() const;
     const vector<vector<char>> *getWarehouse() const;
-    Point findDfsStart();
-    int dfs(Point currentCoord, map<Point, bool>& visited);
-    bool isAir(Point coord) const;
 };
 
 

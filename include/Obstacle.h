@@ -6,8 +6,6 @@
 
 using namespace std;
 
-class Warehouse;
-
 class Obstacle {
 private:
 

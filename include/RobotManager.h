@@ -1,26 +1,21 @@
 #ifndef ROBOT_FLEET_ROBOTMANAGER_H
 #define ROBOT_FLEET_ROBOTMANAGER_H
-#include <random>
 #include <vector>
-
-class Robot;
-class Warehouse;
+#include "Point.h"
+#include "Robot.h"
 
 class RobotManager {
 public:
-    // RobotManager(const Warehouse& warehouse, std::mt19937& seed);
-    RobotManager(const Warehouse& warehouse, std::mt19937& seed, int n);
+    RobotManager() = default;
     ~RobotManager() = default;
-    void addRobot(const Warehouse& warehouse, std::mt19937& seed, int n);
+    void addRobot(std::vector<Point> coords);
     void removeRobot(int n);
-    // void moveRobot(int index, int steps);
-    // Point nextMove(Robot &r);
+    bool containsRobot(const Point &coord) const;
     std::vector<Robot>& getRobots();
     int getNumRobots() const;
 
 private:
     std::vector<Robot> robots;
-    int numRobots;
 };
 
 

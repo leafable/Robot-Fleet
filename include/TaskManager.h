@@ -1,21 +1,29 @@
 #ifndef ROBOT_FLEET_TASKMANAGER_H
 #define ROBOT_FLEET_TASKMANAGER_H
-
+#include <vector>
+#include <deque>
+#include "Point.h"
 #include "Task.h"
-#include "Robot.h"
+
+using namespace std;
 
 class TaskManager {
 private:
     deque<Task> taskQueue;
+    vector<Task> activeTasks;
+    vector<int> noTasksCounter;
+
 public:
     TaskManager() = default;
-    TaskManager(char startName, const Warehouse& warehouse, mt19937& seed, int numTasks);
     ~TaskManager() = default;
-    void addTask(const Task& task);
-    // double getDistance(const Robot& robot, const Task& task, bool pickup_dropoff) const;
+    void addTask(vector<Point> coords);
+    void addTask(const Point &pickup, const Point &dropOff);
     Task popTask();
+    bool containsTask(const Point& coord) const;
     int getSize() const;
-    deque<Task> &getTasks();
+    deque<Task> &getQueuedTasks();
+    vector<Task> &getActiveTasks();
+    vector<int> &getNoTasksCounter();
 };
 
 
