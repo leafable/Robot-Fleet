@@ -22,16 +22,16 @@ The application creates a warehouse with random obstacles and a set number of ro
 # Class Design: 
     Major classes and responsibilities.
 - Obstacle: Creates obstacles and holds the position and size of the obstacle on the map. There are getter functions to access the data.
-- ObstacleManager: Holds all the data for all of the obstacles on the map along with getter functions. There are functions to check objects for overlap and a vector holds all the obstacles.
+- ObstacleManager: Holds all the data for all the obstacles on the map along with getter functions. There are functions to check objects for overlap and a vector holds all the obstacles.
 - Robot: Creates an object Robot that holds data like the robot name, position, path, battery level, and status. Has getters and setters for this data as well.
 - RobotManager: Has an array of Robot objects. Contains the functionality for moving the robots and searching for the shortest path. 
 - System: This class handles the main functionality of the program. It creates all of the managers so they can create the objects for the warehouse. It takes user input to carry out commands like adding tasks or moving the robots. It also prints out the warehouse for the user to view.
 - Task: Creates a task that holds the pick up and drop off coordinates. It has getter functions and a function to check that the robot is able to take on a new task.
-- TaskManager: Holds all of the tasks in a queue that uses FIFO to assign tasks to robots.
+- TaskManager: Holds all the tasks in a queue that uses FIFO to assign tasks to robots.
 
 
 # Building: 
-There is a CMakeList that includes all of the source and header files to create and exe for the program. There are no additional files that are needed outside of the code files themselves.
+There is a CMakeList that includes all the source and header files to create and exe for the program. There are no additional files that are needed outside of the code files themselves.
 
 # Running: 
 Once the exe is created, click on the .exe file to begin the program.

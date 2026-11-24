@@ -2,7 +2,7 @@
 
 **Architecture**: The system class carries out the main functionality of the program. There are certain classes meant to create objects like Obstacle, Robot, and Task. Then there are classes that manager these objects in ObstacleManager, RobotManager, and TaskManager. Warehouse creates and manages the arrays that compose the final printed warehouse.
 Object relationships: 
-- RobotManager is dependent on Robot to create the robots.
+- RobotManager is dependent on Robot to create the robot objects that it stores.
 - ObstacleManager is dependent on Obstacle to create the obstacles and store them in the manager for the warehouse.
 - TaskManager is dependent on Task to create the tasks and store them in the manager so it can be used by the robot and the warehouse.
 - System is dependent on RobotManager, ObstacleManager, TaskManager, and Warehouse to initialize the game.
