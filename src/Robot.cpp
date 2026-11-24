@@ -1,20 +1,21 @@
-#include "Robot.h"
-#include "Task.h"
 #include <utility>
 #include <algorithm>
 #include <queue>
 #include <iostream>
+#include "Robot.h"
+#include "Task.h"
+#include "Warehouse.h"
 
-Robot::Robot(const int n, const int b, const Point &p, string  s)
+Robot::Robot(const char n, const int b, const Point &p, string s)
     : name(n), battery(b), position(p), status(std::move(s)), carry(false)
 {
 }
 
-int Robot::getName() const {
+char Robot::getName() const {
     return name;
 }
 
-void Robot::setName(const int n) {
+void Robot::setName(const char n) {
     name = n;
 }
 
@@ -50,12 +51,12 @@ stack<Point> Robot::getPath() {
     return stack<Point>({{-1, -1}});
 }
 
-void Robot::pushPath(vector <Point> p) {
-    for (int i = 0; i < p.size(); i++) {
-        Point pt = {p[i].x, p[i].y};
-        path.push(pt);
-    }
-}
+// void Robot::pushPath(vector <Point> p) {
+//     for (int i = 0; i < p.size(); i++) {
+//         Point pt = {p[i].x, p[i].y};
+//         path.push(pt);
+//     }
+// }
 
 void Robot::popPath() {
     if (!path.empty()) {
@@ -77,10 +78,6 @@ bool Robot::isPathEmpty() const {
 int Robot::calcH (const Point a, const Point b) {
     return abs(a.x - b.x) + abs(a.y - b.y);
 }
-
-// vector<Point> Robot::searchPath(Warehouse& w, Task& t) {
-//     return searchPath(w, t.getPickupPosition(), t.getDropoffPosition());
-// }
 
 void Robot::searchPath(const Warehouse& w, const Point &pickup, const Point &dropoff) {
     // const vector<vector<char>> grid = {
@@ -223,7 +220,7 @@ void Robot::moveRobot(Task &task) {
 
     if (isPathEmpty()) {
         setStatus("Idle");
-        task = {};
+        task.setDropOffStatus(true);
         carry = false;
         return;
     }
@@ -232,15 +229,16 @@ void Robot::moveRobot(Task &task) {
     //they will simply process one move
     setPosition(peekPath());
     path.pop();
+    setBattery(getBattery() - 5);
     if (position == task.getPickupPosition()) {
+        task.setPickupStatus(true);
         carry = true;
     }
     setStatus(isPathEmpty() ? "Idle" : "Active");
     if (isPathEmpty()) {
-        task = {};
+        task.setDropOffStatus(true);
         carry = false;
     }
-    setBattery(getBattery() - 5);
 }
 
 bool Robot::isCarrying() const {

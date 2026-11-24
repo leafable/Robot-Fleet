@@ -1,7 +1,6 @@
 #include "ObstacleManager.h"
 #include "Warehouse.h"
 #include <iostream>
-#include <map>
 
 // If no seed is provided, pass the randomly generated seed
 // ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& warehouse) : ObstacleManager(targetNumObstacles, warehouse, warehouse.getWarehouseSeed()) {}
@@ -12,7 +11,7 @@ ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& wareho
         return;
     }
 
-    const int maxAttempts = 100;
+    constexpr int maxAttempts = 100;
     int attempts{};
 
     // Repeat while the size of the vector is less than the target number of obstacles,
@@ -36,9 +35,9 @@ ObstacleManager::ObstacleManager(const int targetNumObstacles, Warehouse& wareho
         const auto start = warehouse.findDfsStart();
         numSpacesTaken += candidate.getSize().x * candidate.getSize().y;
         const int numAirSpaces = warehouse.getWarehouseSize() * warehouse.getWarehouseSize() - numSpacesTaken;
-        map<Point, bool> visited;
+        vector<vector<bool>> visited(warehouse.getWarehouseSize(), vector<bool>(warehouse.getWarehouseSize(), false));
 
-        if (start.x == -1 && start.y == -1 || warehouse.dfs(start, visited) < numAirSpaces) {
+        if (!warehouse.isValidPoint(start) || warehouse.dfs(start, visited) < numAirSpaces) {
             attempts++;
             numSpacesTaken -= candidate.getSize().x * candidate.getSize().y;
             warehouse.drawObstacles(candidate, false);
